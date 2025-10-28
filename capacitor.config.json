@@ -3,6 +3,8 @@
   "appName": "SKSU FAQ Bot",
   "webDir": "public",
   "server": {
+    "url": "https://faqbot-production.up.railway.app",
+    "cleartext": true,
     "androidScheme": "https"
   }
 }

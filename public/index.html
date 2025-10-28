@@ -323,6 +323,121 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      .admin-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      .admin-btn:hover {
+        transform: scale(1.1) rotate(15deg);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.3s ease;
+      }
+      @keyframes slideUp {
+        from { 
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to { 
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .modal-content h2 {
+        margin: 0 0 1.5rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .modal-content input {
+        width: 100%;
+        padding: 0.9rem;
+        border: 2px solid #e8e8e8;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        font-family: inherit;
+      }
+      .modal-content input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .modal-buttons button {
+        flex: 1;
+        padding: 0.9rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      .btn-cancel {
+        background: #e0e0e0;
+        color: #666;
+      }
+      .btn-cancel:hover {
+        background: #d0d0d0;
+      }
+      .error-msg {
+        color: #e74c3c;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+      .error-msg.show {
+        display: block;
+      }
       @media (max-width: 768px) {
         .container {
           padding: 2rem 1.5rem;
@@ -381,6 +496,64 @@
       </div>
     </div>
 
+    <!-- Admin Login Button -->
+    <button class="admin-btn" onclick="showAdminLogin()" title="Admin Login">🔐</button>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-modal" class="modal">
+      <div class="modal-content">
+        <h2>🔐 Admin Login</h2>
+        <input type="text" id="admin-username" placeholder="Username" autocomplete="username">
+        <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password">
+        <div class="error-msg" id="login-error">Invalid credentials. Please try again.</div>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeAdminLogin()">Cancel</button>
+          <button class="btn-login" onclick="adminLogin()">Login</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/script.js"></script>
+    <script>
+      function showAdminLogin() {
+        document.getElementById('admin-modal').classList.add('active');
+        document.getElementById('admin-username').focus();
+      }
+
+      function closeAdminLogin() {
+        document.getElementById('admin-modal').classList.remove('active');
+        document.getElementById('admin-username').value = '';
+        document.getElementById('admin-password').value = '';
+        document.getElementById('login-error').classList.remove('show');
+      }
+
+      function adminLogin() {
+        const username = document.getElementById('admin-username').value.trim();
+        const password = document.getElementById('admin-password').value;
+        const errorMsg = document.getElementById('login-error');
+
+        // Simple authentication - change these credentials!
+        if (username === 'admin' && password === 'sbo2024') {
+          // Store login session
+          sessionStorage.setItem('admin_logged_in', 'true');
+          // Redirect to admin panel
+          window.location.href = '/admin';
+        } else {
+          errorMsg.classList.add('show');
+          document.getElementById('admin-password').value = '';
+          setTimeout(() => errorMsg.classList.remove('show'), 3000);
+        }
+      }
+
+      // Allow Enter key to submit
+      document.getElementById('admin-password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') adminLogin();
+      });
+
+      // Close modal on background click
+      document.getElementById('admin-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'admin-modal') closeAdminLogin();
+      });
+    </script>
   </body>
 </html>

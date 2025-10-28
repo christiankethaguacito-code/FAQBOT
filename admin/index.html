@@ -337,8 +337,15 @@
 </head>
 <body>
   <div class="header">
-    <h1>🛠️ SBO Admin Panel</h1>
-    <p>Manage FAQs, view analytics, and monitor student questions</p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1>🛠️ SBO Admin Panel</h1>
+        <p>Manage FAQs, view analytics, and monitor student questions</p>
+      </div>
+      <button onclick="logout()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 0.7rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+        🚪 Logout
+      </button>
+    </div>
   </div>
 
   <div class="nav">
@@ -524,6 +531,20 @@
   <script>
     console.log('🚀 Admin panel starting...');
     
+    // Check if user is logged in
+    if (!sessionStorage.getItem('admin_logged_in')) {
+      alert('Please login first!');
+      window.location.href = '/';
+    }
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('admin_logged_in');
+        window.location.href = '/';
+      }
+    }
+
     let currentFaqs = [];
 
     // Toast notification system

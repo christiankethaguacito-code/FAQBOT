@@ -13,21 +13,27 @@
         margin: 0;
         padding: 0;
       }
+      
+      /* Mobile-first base styles */
       body { 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-        max-width: 1000px; 
+        max-width: 100%;
         margin: 0 auto; 
-        padding: 2rem 1rem;
+        padding: 1rem;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
       }
+      
       .container {
         background: white;
-        border-radius: 24px;
-        padding: 3rem;
-        box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         animation: slideIn 0.5s ease;
+        max-width: 1000px;
+        margin: 0 auto;
       }
+      
       @keyframes slideIn {
         from {
           opacity: 0;
@@ -38,45 +44,55 @@
           transform: translateY(0);
         }
       }
+      
       h1 { 
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         margin: 0 0 0.5rem 0;
-        font-size: 2.5rem;
+        font-size: clamp(1.75rem, 5vw, 2.5rem);
         font-weight: 800;
+        line-height: 1.2;
       }
+      
       .tagline {
         color: #666;
-        margin: 0 0 2.5rem 0;
-        font-size: 1rem;
+        margin: 0 0 2rem 0;
+        font-size: clamp(0.875rem, 2vw, 1rem);
         display: flex;
         align-items: center;
         gap: 0.5rem;
         flex-wrap: wrap;
       }
+      
       .tagline::before {
         content: "📍";
         font-size: 1.2rem;
       }
       .quick-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2.5rem;
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+        margin-bottom: 2rem;
       }
+      
       .quick-btn {
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
         border: 2px solid #e3e5ff;
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 1rem;
         cursor: pointer;
         transition: all 0.3s ease;
         text-align: left;
         position: relative;
         overflow: hidden;
+        min-height: 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
+      
       .quick-btn::before {
         content: '';
         position: absolute;
@@ -88,24 +104,28 @@
         transition: left 0.3s ease;
         z-index: 0;
       }
+      
       .quick-btn:hover::before {
         left: 0;
       }
+      
       .quick-btn:hover {
         color: white;
         border-color: #667eea;
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
       }
+      
       .quick-btn strong {
         display: block;
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
+        font-size: clamp(0.9rem, 2vw, 1rem);
+        margin-bottom: 0.35rem;
         position: relative;
         z-index: 1;
       }
+      
       .quick-btn span {
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 1.8vw, 0.9rem);
         opacity: 0.8;
         position: relative;
         z-index: 1;
@@ -114,46 +134,54 @@
         position: relative;
         margin-bottom: 1rem;
       }
+      
       .input-label {
         display: block;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 2vw, 0.9rem);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: #667eea;
         margin-bottom: 0.75rem;
       }
+      
       textarea { 
         width: 100%; 
-        min-height: 120px;
-        padding: 1.25rem;
+        min-height: 100px;
+        padding: 1rem;
         border: 3px solid #e8e8e8;
         border-radius: 12px;
-        font-size: 1.05rem;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
         font-family: inherit;
         resize: vertical;
         transition: all 0.3s ease;
         line-height: 1.6;
       }
+      
       textarea:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
       }
+      
       .button-row {
-        margin-top: 1.5rem;
+        margin-top: 1.25rem;
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
+        flex-wrap: wrap;
       }
+      
       button {
-        padding: 1rem 2rem;
+        padding: 0.875rem 1.5rem;
         border: none;
         border-radius: 12px;
-        font-size: 1.05rem;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
         cursor: pointer;
         transition: all 0.3s ease;
         font-weight: 700;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        flex: 1;
+        min-width: 120px;
       }
       #ask {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -197,13 +225,14 @@
         border-color: #d0d0d0;
       }
       .answer { 
-        margin-top: 2.5rem; 
-        padding: 2rem; 
+        margin-top: 2rem; 
+        padding: 1.5rem; 
         border-radius: 16px; 
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
         border: 2px solid #e3e5ff;
         animation: fadeIn 0.5s ease;
       }
+      
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -214,22 +243,26 @@
           transform: translateY(0);
         }
       }
+      
       .answer-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
         padding-bottom: 1rem;
         border-bottom: 2px solid #e3e5ff;
+        flex-wrap: wrap;
       }
+      
       .answer-icon {
-        font-size: 2rem;
+        font-size: clamp(1.5rem, 4vw, 2rem);
       }
+      
       .badge {
         display: inline-block;
-        padding: 0.4rem 1rem;
+        padding: 0.35rem 0.875rem;
         border-radius: 20px;
-        font-size: 0.75rem;
+        font-size: clamp(0.7rem, 1.8vw, 0.75rem);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -250,37 +283,42 @@
         border: 1px solid #a5d6a7;
       }
       #answerText {
-        font-size: 1.1rem;
+        font-size: clamp(1rem, 2.2vw, 1.1rem);
         line-height: 1.8;
         color: #333;
       }
+      
       .meta { 
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
         border-top: 2px solid #e3e5ff;
         color: #666; 
-        font-size: 0.95rem;
+        font-size: clamp(0.85rem, 2vw, 0.95rem);
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 1rem;
       }
+      
       .confidence-bar {
         flex: 1;
-        min-width: 200px;
+        min-width: 100%;
       }
+      
       .confidence-label {
-        font-size: 0.85rem;
+        font-size: clamp(0.8rem, 1.8vw, 0.85rem);
         margin-bottom: 0.5rem;
         font-weight: 600;
       }
+      
       .confidence-track {
         height: 8px;
         background: #e0e0e0;
         border-radius: 10px;
         overflow: hidden;
       }
+      
       .confidence-fill {
         height: 100%;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -288,28 +326,33 @@
         transition: width 0.6s ease;
       }
       .contact-cta {
-        margin-top: 2rem;
-        padding: 1.5rem;
+        margin-top: 1.5rem;
+        padding: 1.25rem;
         background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
         border-radius: 12px;
         border: 2px solid #ffe082;
       }
+      
       .contact-cta strong {
         display: block;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
         color: #856404;
-        font-size: 1.1rem;
+        font-size: clamp(1rem, 2.2vw, 1.1rem);
       }
+      
       .contact-cta a {
         color: #667eea;
         text-decoration: none;
         font-weight: 700;
         transition: color 0.2s;
+        word-break: break-all;
       }
+      
       .contact-cta a:hover {
         color: #764ba2;
         text-decoration: underline;
       }
+      
       .loading {
         display: inline-block;
         width: 1.2rem;
@@ -319,29 +362,102 @@
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
+      
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      
       .admin-btn {
         position: fixed;
-        bottom: 2rem;
-        right: 2rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
         border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
+        width: 56px;
+        height: 56px;
+        font-size: 1.4rem;
         cursor: pointer;
         box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
       }
+      
+      .admin-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.5s, height 0.5s;
+      }
+      
+      .admin-btn:hover::before {
+        width: 100px;
+        height: 100px;
+      }
+      
       .admin-btn:hover {
-        transform: scale(1.1) rotate(15deg);
-        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        transform: scale(1.15) rotate(15deg);
+        box-shadow: 0 8px 35px rgba(102, 126, 234, 0.7);
+      }
+      
+      .admin-btn:active {
+        transform: scale(0.95) rotate(0deg);
+      }
+      
+      .admin-btn span {
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Tooltip for admin button */
+      .admin-btn::after {
+        content: 'Admin Login';
+        position: absolute;
+        right: 70px;
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.3s;
+        transform: translateX(10px);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      }
+      
+      .admin-btn:hover::after {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      
+      /* Pulse animation for attention */
+      @keyframes pulse {
+        0%, 100% {
+          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+          box-shadow: 0 4px 30px rgba(102, 126, 234, 0.7);
+        }
+      }
+      
+      .admin-btn.pulse {
+        animation: pulse 2s infinite;
       }
       .modal {
         display: none;
@@ -355,99 +471,296 @@
         z-index: 2000;
         align-items: center;
         justify-content: center;
+        padding: 1rem;
       }
+      
       .modal.active {
         display: flex;
       }
+      
       .modal-content {
         background: white;
-        border-radius: 16px;
-        padding: 2.5rem;
+        border-radius: 20px;
+        padding: 2rem;
         max-width: 400px;
-        width: 90%;
+        width: 100%;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: slideUp 0.3s ease;
+        animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
+      
+      .modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      }
+      
       @keyframes slideUp {
         from { 
-          transform: translateY(50px);
+          transform: translateY(50px) scale(0.95);
           opacity: 0;
         }
         to { 
-          transform: translateY(0);
+          transform: translateY(0) scale(1);
           opacity: 1;
         }
       }
+      
       .modal-content h2 {
-        margin: 0 0 1.5rem 0;
+        margin: 0 0 0.5rem 0;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        font-size: clamp(1.5rem, 4vw, 1.75rem);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
+      
+      .modal-subtitle {
+        color: #666;
+        font-size: clamp(0.85rem, 2vw, 0.9rem);
+        margin-bottom: 1.5rem;
+        font-weight: 400;
+      }
+      
+      .input-group {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+      
+      .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 1.1rem;
+        pointer-events: none;
+      }
+      
       .modal-content input {
         width: 100%;
-        padding: 0.9rem;
+        padding: 0.875rem 0.875rem 0.875rem 2.75rem;
         border: 2px solid #e8e8e8;
-        border-radius: 8px;
-        font-size: 1rem;
-        margin-bottom: 1rem;
+        border-radius: 10px;
+        font-size: clamp(0.95rem, 2vw, 1rem);
+        margin-bottom: 0;
         font-family: inherit;
+        transition: all 0.3s ease;
       }
+      
       .modal-content input:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
       }
+      
+      .modal-content input::placeholder {
+        color: #aaa;
+      }
+      
       .modal-buttons {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         margin-top: 1.5rem;
+        flex-wrap: wrap;
       }
+      
       .modal-buttons button {
         flex: 1;
-        padding: 0.9rem;
+        padding: 1rem;
         border: none;
-        border-radius: 8px;
-        font-size: 1rem;
+        border-radius: 10px;
+        font-size: clamp(0.95rem, 2vw, 1rem);
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
+        min-width: 120px;
+        position: relative;
+        overflow: hidden;
       }
+      
       .btn-login {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
       }
+      
+      .btn-login::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+      
+      .btn-login:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+      
       .btn-login:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
       }
+      
+      .btn-login:active {
+        transform: translateY(0);
+      }
+      
+      .btn-login span {
+        position: relative;
+        z-index: 1;
+      }
+      
       .btn-cancel {
-        background: #e0e0e0;
+        background: #f5f5f5;
         color: #666;
+        border: 2px solid #e0e0e0;
       }
+      
       .btn-cancel:hover {
-        background: #d0d0d0;
+        background: #e8e8e8;
+        border-color: #d0d0d0;
+        transform: translateY(-1px);
       }
+      
       .error-msg {
         color: #e74c3c;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+        font-size: clamp(0.85rem, 2vw, 0.9rem);
+        margin-top: 0.75rem;
         display: none;
+        padding: 0.75rem;
+        background: #fee;
+        border-radius: 8px;
+        border-left: 3px solid #e74c3c;
+        animation: shake 0.4s ease;
       }
+      
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+      
       .error-msg.show {
         display: block;
       }
-      @media (max-width: 768px) {
-        .container {
-          padding: 2rem 1.5rem;
-          border-radius: 16px;
-        }
-        h1 {
-          font-size: 2rem;
-        }
+      
+      /* Responsive breakpoints */
+      @media (min-width: 480px) {
         .quick-actions {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .confidence-bar {
+          min-width: 200px;
+        }
+        
+        .admin-btn::after {
+          display: block;
+        }
+      }
+      
+      @media (max-width: 479px) {
+        .admin-btn::after {
+          display: none;
+        }
+      }
+      
+      @media (min-width: 768px) {
+        body {
+          padding: 2rem 1.5rem;
+        }
+        
+        .container {
+          padding: 2.5rem;
+          border-radius: 20px;
+        }
+        
+        .quick-actions {
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+        
+        .quick-btn {
+          padding: 1.25rem;
+        }
+        
+        textarea {
+          min-height: 120px;
+          padding: 1.25rem;
+        }
+        
+        .button-row {
+          margin-top: 1.5rem;
+          gap: 1rem;
+        }
+        
+        button {
+          padding: 1rem 2rem;
+        }
+        
+        .answer {
+          padding: 2rem;
+        }
+        
+        .admin-btn {
+          width: 60px;
+          height: 60px;
+          font-size: 1.5rem;
+          bottom: 2rem;
+          right: 2rem;
+        }
+      }
+      
+      @media (min-width: 1024px) {
+        .container {
+          padding: 3rem;
+          border-radius: 24px;
+        }
+      }
+      
+      /* Landscape orientation adjustments */
+      @media (max-height: 600px) and (orientation: landscape) {
+        body {
+          padding: 1rem;
+        }
+        
+        .container {
+          padding: 1.5rem;
+        }
+        
+        h1 {
+          font-size: 1.75rem;
+        }
+        
+        .quick-actions {
+          margin-bottom: 1.5rem;
+        }
+        
+        textarea {
+          min-height: 80px;
+        }
+        
+        .admin-btn {
+          width: 50px;
+          height: 50px;
+          font-size: 1.3rem;
+          bottom: 1rem;
+          right: 1rem;
         }
       }
     </style>
@@ -497,18 +810,35 @@
     </div>
 
     <!-- Admin Login Button -->
-    <button class="admin-btn" onclick="showAdminLogin()" title="Admin Login">🔐</button>
+    <button class="admin-btn" onclick="showAdminLogin()" title="Admin Login">
+      <span>🔐</span>
+    </button>
 
     <!-- Admin Login Modal -->
-    <div id="admin-modal" class="modal">
+    <div id="admin-modal" class="modal" onclick="closeModalOnOutsideClick(event)">
       <div class="modal-content">
-        <h2>🔐 Admin Login</h2>
-        <input type="text" id="admin-username" placeholder="Username" autocomplete="username">
-        <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password">
-        <div class="error-msg" id="login-error">Invalid credentials. Please try again.</div>
+        <h2>�️ Admin Access</h2>
+        <p class="modal-subtitle">Enter your credentials to access the admin panel</p>
+        
+        <div class="input-group">
+          <span class="input-icon">👤</span>
+          <input type="text" id="admin-username" placeholder="Username" autocomplete="username">
+        </div>
+        
+        <div class="input-group">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" onkeypress="handleEnterKey(event)">
+        </div>
+        
+        <div class="error-msg" id="login-error">
+          ❌ Invalid credentials. Please try again.
+        </div>
+        
         <div class="modal-buttons">
           <button class="btn-cancel" onclick="closeAdminLogin()">Cancel</button>
-          <button class="btn-login" onclick="adminLogin()">Login</button>
+          <button class="btn-login" onclick="adminLogin()">
+            <span>Login</span>
+          </button>
         </div>
       </div>
     </div>
@@ -517,14 +847,30 @@
     <script>
       function showAdminLogin() {
         document.getElementById('admin-modal').classList.add('active');
-        document.getElementById('admin-username').focus();
+        setTimeout(() => {
+          document.getElementById('admin-username').focus();
+        }, 100);
       }
 
       function closeAdminLogin() {
         document.getElementById('admin-modal').classList.remove('active');
-        document.getElementById('admin-username').value = '';
-        document.getElementById('admin-password').value = '';
-        document.getElementById('login-error').classList.remove('show');
+        setTimeout(() => {
+          document.getElementById('admin-username').value = '';
+          document.getElementById('admin-password').value = '';
+          document.getElementById('login-error').classList.remove('show');
+        }, 300);
+      }
+      
+      function closeModalOnOutsideClick(event) {
+        if (event.target.id === 'admin-modal') {
+          closeAdminLogin();
+        }
+      }
+      
+      function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+          adminLogin();
+        }
       }
 
       function adminLogin() {

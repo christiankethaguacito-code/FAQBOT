@@ -1,0 +1,8 @@
+{
+  "appId": "com.sksu.faqbot",
+  "appName": "SKSU FAQ Bot",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https"
+  }
+}

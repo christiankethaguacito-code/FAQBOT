@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin API Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+    button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+    pre { background: #2d2d2d; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    .success { color: #4ec9b0; }
+    .error { color: #f48771; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Admin API Tester</h1>
+  
+  <button onclick="testFAQs()">Test GET /api/admin/faqs</button>
+  <button onclick="testAnalytics()">Test GET /api/admin/analytics</button>
+  <button onclick="testPublicFAQs()">Test GET /api/faqs</button>
+  
+  <div id="output"></div>
+
+  <script>
+    const output = document.getElementById('output');
+
+    async function testFAQs() {
+      output.innerHTML = '<p>Testing /api/admin/faqs...</p>';
+      try {
+        const res = await fetch('/api/admin/faqs');
+        const data = await res.json();
+        output.innerHTML = `
+          <p class="success">✅ SUCCESS - Status: ${res.status}</p>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+      } catch (error) {
+        output.innerHTML = `<p class="error">❌ ERROR: ${error.message}</p>`;
+      }
+    }
+
+    async function testAnalytics() {
+      output.innerHTML = '<p>Testing /api/admin/analytics...</p>';
+      try {
+        const res = await fetch('/api/admin/analytics');
+        const data = await res.json();
+        output.innerHTML = `
+          <p class="success">✅ SUCCESS - Status: ${res.status}</p>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+      } catch (error) {
+        output.innerHTML = `<p class="error">❌ ERROR: ${error.message}</p>`;
+      }
+    }
+
+    async function testPublicFAQs() {
+      output.innerHTML = '<p>Testing /api/faqs...</p>';
+      try {
+        const res = await fetch('/api/faqs');
+        const data = await res.json();
+        output.innerHTML = `
+          <p class="success">✅ SUCCESS - Status: ${res.status}</p>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+      } catch (error) {
+        output.innerHTML = `<p class="error">❌ ERROR: ${error.message}</p>`;
+      }
+    }
+
+    // Auto-test on load
+    window.onload = () => {
+      console.log('🧪 Test page loaded - Click buttons to test APIs');
+    };
+  </script>
+</body>
+</html>

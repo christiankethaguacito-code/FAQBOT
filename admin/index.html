@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SBO Admin Panel - FAQ Management</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.75rem;
+    }
+    .header p {
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+    }
+    .nav {
+      background: white;
+      padding: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .nav button {
+      padding: 1rem 2rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav button.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    .nav button:hover {
+      background: #f9f9f9;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    .stat-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    .stat-card p {
+      margin: 0;
+      opacity: 0.95;
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 1rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #667eea;
+    }
+    tbody tr {
+      transition: background 0.2s;
+    }
+    tbody tr:hover {
+      background: #f8f9ff;
+    }
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #e082ea 0%, #e4465b 100%);
+    }
+    .btn-small {
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      margin: 0 0.25rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.9rem;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+      color: #333;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 650px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { 
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to { 
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-header h2 {
+      margin: 0;
+    }
+    .close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+    }
+    .close:hover {
+      color: #333;
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      color: #667eea;
+      border-radius: 20px;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid #d1c4e9;
+    }
+    .card h2 {
+      color: #333;
+      font-size: 1.5rem;
+      margin: 0 0 1.5rem 0;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #667eea;
+      display: inline-block;
+    }
+    .faq-question {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #999;
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+      border-left: 4px solid #4caf50;
+    }
+    .toast.error {
+      border-left-color: #f44336;
+    }
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+    .toast.hiding {
+      animation: slideOutRight 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🛠️ SBO Admin Panel</h1>
+    <p>Manage FAQs, view analytics, and monitor student questions</p>
+  </div>
+
+  <div class="nav">
+    <button class="tab-btn active" data-tab="analytics">📊 Analytics</button>
+    <button class="tab-btn" data-tab="faqs">📝 Manage FAQs</button>
+    <button class="tab-btn" data-tab="unanswered">❓ Unanswered Questions</button>
+  </div>
+
+  <div class="container">
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="total-queries">-</h3>
+          <p>Total Queries (30 days)</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="unique-users">-</h3>
+          <p>Unique Users</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avg-score">-</h3>
+          <p>Avg Confidence</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="low-conf">-</h3>
+          <p>Low Confidence</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🔥 Top 20 Questions</h2>
+        <table id="top-questions-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Times Asked</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>📈 FAQ Usage</h2>
+        <table id="faq-usage-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Question</th>
+              <th>Times Matched</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FAQs Tab -->
+    <div id="faqs" class="tab-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0; border: none;">📝 All FAQs</h2>
+          <button class="btn btn-primary" onclick="showAddModal()">
+            <span style="font-size: 1.2rem;">+</span> Add New FAQ
+          </button>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <input type="text" id="faq-search" placeholder="🔍 Search FAQs by category, question, or keywords..." 
+                 style="width: 100%; padding: 0.9rem; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 1rem;"
+                 oninput="filterFAQs(this.value)">
+        </div>
+        
+        <table id="faqs-table">
+          <thead>
+            <tr>
+              <th style="width: 12%;">Category</th>
+              <th style="width: 30%;">Question</th>
+              <th style="width: 25%;">Keywords</th>
+              <th style="width: 18%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem; color: #999;">
+                <div class="empty-state-icon">📋</div>
+                <p>Loading FAQs...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Unanswered Questions Tab -->
+    <div id="unanswered" class="tab-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0; border: none;">❓ Unanswered Questions</h2>
+          <button class="btn btn-primary" onclick="refreshUnanswered()">
+            🔄 Refresh
+          </button>
+        </div>
+        <p style="color: #666; margin-bottom: 1.5rem;">
+          Questions with low confidence scores (&lt;30%) that may need new FAQs. Click "Create FAQ" to add them to the database.
+        </p>
+        <table id="unanswered-table">
+          <thead>
+            <tr>
+              <th style="width: 40%;">Question</th>
+              <th style="width: 12%;">Confidence</th>
+              <th style="width: 12%;">Times Asked</th>
+              <th style="width: 18%;">Timestamp</th>
+              <th style="width: 18%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">
+                <div class="empty-state-icon">🔍</div>
+                <p>Loading unanswered questions...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit FAQ Modal -->
+  <div id="faq-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title" style="margin: 0; color: #667eea;">Add New FAQ</h2>
+        <button class="close" onclick="closeModal()" style="font-size: 2rem; color: #999; transition: color 0.2s;">&times;</button>
+      </div>
+      <form id="faq-form" style="margin-top: 2rem;">
+        <input type="hidden" id="faq-id">
+        
+        <div class="form-group">
+          <label>📂 Category</label>
+          <input type="text" id="category" required placeholder="e.g., Events, Contact, Services" 
+                 style="font-size: 1rem;">
+        </div>
+        
+        <div class="form-group">
+          <label>❓ Question</label>
+          <input type="text" id="question" required placeholder="What do students ask?" 
+                 style="font-size: 1rem;">
+        </div>
+        
+        <div class="form-group">
+          <label>💬 Answer</label>
+          <textarea id="answer" rows="6" required 
+                    placeholder="Provide a clear, helpful answer..."
+                    style="font-size: 1rem; line-height: 1.6;"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>🏷️ Keywords (comma-separated)</label>
+          <input type="text" id="keywords" 
+                 placeholder="contact, email, reach, location"
+                 style="font-size: 1rem;">
+          <small style="color: #999; font-size: 0.85rem;">
+            These help match user questions more accurately
+          </small>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            💾 Save FAQ
+          </button>
+          <button type="button" class="btn" onclick="closeModal()" 
+                  style="flex: 1; background: #e0e0e0; color: #666;">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    console.log('🚀 Admin panel starting...');
+    
+    let currentFaqs = [];
+
+    // Toast notification system
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+      
+      const icon = type === 'error' ? '❌' : '✅';
+      toast.innerHTML = `
+        <span style="font-size: 1.5rem;">${icon}</span>
+        <span style="font-weight: 600;">${message}</span>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Simple tab switching function
+    function switchTab(tabName) {
+      console.log('Switching to tab:', tabName);
+      
+      // Remove active from all buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      // Remove active from all content
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      // Add active to clicked button
+      event.target.classList.add('active');
+      
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    // Load analytics
+    async function loadAnalytics() {
+      try {
+        console.log('📊 Loading analytics...');
+        const res = await fetch('/api/admin/analytics');
+        const data = await res.json();
+        
+        document.getElementById('total-queries').textContent = data.stats.total_queries || 0;
+        document.getElementById('unique-users').textContent = data.stats.unique_users || 0;
+        document.getElementById('avg-score').textContent = ((data.stats.avg_score || 0) * 100).toFixed(0) + '%';
+        document.getElementById('low-conf').textContent = data.stats.low_confidence_queries || 0;
+      
+        const topQuestionsBody = document.querySelector('#top-questions-table tbody');
+        topQuestionsBody.innerHTML = data.topQuestions.map(q => `
+          <tr>
+            <td>${q.question}</td>
+            <td><strong>${q.count}</strong></td>
+          </tr>
+        `).join('');
+        
+        const faqUsageBody = document.querySelector('#faq-usage-table tbody');
+        faqUsageBody.innerHTML = data.faqUsage.map(f => `
+          <tr>
+            <td><span class="tag">${f.category || 'General'}</span></td>
+            <td>${f.question}</td>
+            <td><strong>${f.times_matched}</strong></td>
+          </tr>
+        `).join('');
+        console.log('✅ Analytics loaded');
+      } catch (error) {
+        console.error('❌ Error loading analytics:', error);
+      }
+    }
+
+    // Load FAQs
+    async function loadFAQs() {
+      try {
+        console.log('📝 Loading FAQs...');
+        const res = await fetch('/api/admin/faqs');
+        currentFaqs = await res.json();
+        console.log('FAQs loaded:', currentFaqs.length);
+        
+        const tbody = document.querySelector('#faqs-table tbody');
+        
+        if (currentFaqs.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">No FAQs Yet</p>
+                <p style="font-size: 0.9rem; color: #999;">Click "Add New FAQ" to create your first FAQ</p>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = currentFaqs.map(faq => `
+            <tr>
+              <td>
+                <span class="tag">${faq.category || 'General'}</span>
+              </td>
+              <td>
+                <div class="faq-question">${faq.question}</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
+                  ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+                </div>
+              </td>
+              <td>
+                ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
+                ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
+              </td>
+              <td>
+                <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
+                  🗑️ Delete
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+        console.log('✅ FAQs loaded');
+      } catch (error) {
+        console.error('❌ Error loading FAQs:', error);
+        const tbody = document.querySelector('#faqs-table tbody');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <p style="color: #e74c3c;">Error loading FAQs</p>
+              <p style="font-size: 0.9rem; color: #999;">${error.message}</p>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function filterFAQs(searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
+      const tbody = document.querySelector('#faqs-table tbody');
+      
+      if (!currentFaqs || currentFaqs.length === 0) {
+        return;
+      }
+      
+      if (!term) {
+        // Show all FAQs if search is empty
+        tbody.innerHTML = currentFaqs.map(faq => `
+          <tr>
+            <td>
+              <span class="tag">${faq.category || 'General'}</span>
+            </td>
+            <td>
+              <div class="faq-question">${faq.question}</div>
+              <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
+                ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+              </div>
+            </td>
+            <td>
+              ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
+              ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
+            </td>
+            <td>
+              <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
+                🗑️ Delete
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        return;
+      }
+      
+      // Filter FAQs by category, question, or keywords
+      const filtered = currentFaqs.filter(faq => {
+        const categoryMatch = (faq.category || '').toLowerCase().includes(term);
+        const questionMatch = faq.question.toLowerCase().includes(term);
+        const keywordsMatch = faq.keywords.some(k => k.toLowerCase().includes(term));
+        return categoryMatch || questionMatch || keywordsMatch;
+      });
+      
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-state">
+              <div class="empty-state-icon">🔍</div>
+              <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">No FAQs Found</p>
+              <p style="font-size: 0.9rem; color: #999;">No FAQs match "${searchTerm}"</p>
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = filtered.map(faq => `
+          <tr>
+            <td>
+              <span class="tag">${faq.category || 'General'}</span>
+            </td>
+            <td>
+              <div class="faq-question">${faq.question}</div>
+              <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
+                ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+              </div>
+            </td>
+            <td>
+              ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
+              ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
+            </td>
+            <td>
+              <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
+                🗑️ Delete
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function showAddModal() {
+      document.getElementById('modal-title').textContent = 'Add New FAQ';
+      document.getElementById('faq-form').reset();
+      document.getElementById('faq-id').value = '';
+      document.getElementById('faq-modal').classList.add('active');
+    }
+
+    function editFAQ(id) {
+      const faq = currentFaqs.find(f => f.id === id);
+      if (!faq) return;
+      
+      document.getElementById('modal-title').textContent = 'Edit FAQ';
+      document.getElementById('faq-id').value = faq.id;
+      document.getElementById('category').value = faq.category;
+      document.getElementById('question').value = faq.question;
+      document.getElementById('answer').value = faq.answer;
+      document.getElementById('keywords').value = faq.keywords.join(', ');
+      document.getElementById('faq-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('faq-modal').classList.remove('active');
+    }
+
+    async function deleteFAQ(id) {
+      if (!confirm('Are you sure you want to delete this FAQ?')) return;
+      
+      try {
+        const res = await fetch(`/api/admin/faqs/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete FAQ');
+        
+        await loadFAQs();
+        await loadAnalytics();
+        showToast('FAQ deleted successfully');
+        console.log('✅ FAQ deleted successfully');
+      } catch (error) {
+        showToast('Error deleting FAQ: ' + error.message, 'error');
+        console.error('Error deleting FAQ:', error);
+      }
+    }
+
+    // Load unanswered questions
+    async function loadUnanswered() {
+      try {
+        console.log('❓ Loading unanswered questions...');
+        const res = await fetch('/api/admin/unanswered');
+        const questions = await res.json();
+        console.log('Unanswered questions loaded:', questions.length);
+        
+        const tbody = document.querySelector('#unanswered-table tbody');
+        
+        if (questions.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state">
+                <div class="empty-state-icon">🎉</div>
+                <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">All Questions Answered!</p>
+                <p style="font-size: 0.9rem; color: #999;">No low-confidence questions in the past 30 days</p>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = questions.map(q => `
+            <tr>
+              <td>
+                <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">${q.question}</div>
+              </td>
+              <td>
+                <span class="tag" style="background: ${q.score < 0.15 ? '#ffebee' : '#fff3e0'}; color: ${q.score < 0.15 ? '#c62828' : '#e65100'};">
+                  ${(q.score * 100).toFixed(0)}%
+                </span>
+              </td>
+              <td style="text-align: center;">
+                <strong>${q.times_asked}</strong>
+              </td>
+              <td style="font-size: 0.85rem; color: #666;">
+                ${new Date(q.timestamp).toLocaleString()}
+              </td>
+              <td>
+                <button class="btn btn-primary btn-small" onclick="createFAQFromQuestion('${q.question.replace(/'/g, "\\'")}')">
+                  ➕ Create FAQ
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteUnanswered(${q.id})">
+                  🗑️ Dismiss
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+        console.log('✅ Unanswered questions loaded');
+      } catch (error) {
+        console.error('❌ Error loading unanswered:', error);
+        const tbody = document.querySelector('#unanswered-table tbody');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <p style="color: #e74c3c;">Error loading unanswered questions</p>
+              <p style="font-size: 0.9rem; color: #999;">${error.message}</p>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function refreshUnanswered() {
+      loadUnanswered();
+    }
+
+    function createFAQFromQuestion(question) {
+      document.getElementById('modal-title').textContent = 'Create FAQ from Question';
+      document.getElementById('faq-form').reset();
+      document.getElementById('faq-id').value = '';
+      document.getElementById('question').value = question;
+      document.getElementById('faq-modal').classList.add('active');
+    }
+
+    async function deleteUnanswered(id) {
+      if (!confirm('Dismiss this question? It will be removed from the unanswered list.')) return;
+      
+      try {
+        const res = await fetch(`/api/admin/unanswered/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to dismiss question');
+        
+        await loadUnanswered();
+        showToast('Question dismissed successfully');
+        console.log('✅ Question dismissed successfully');
+      } catch (error) {
+        showToast('Error dismissing question: ' + error.message, 'error');
+        console.error('Error dismissing question:', error);
+      }
+    }
+
+    // Make functions globally accessible for onclick attributes
+    window.showAddModal = showAddModal;
+    window.editFAQ = editFAQ;
+    window.closeModal = closeModal;
+    window.deleteFAQ = deleteFAQ;
+    window.filterFAQs = filterFAQs;
+    window.createFAQFromQuestion = createFAQFromQuestion;
+    window.deleteUnanswered = deleteUnanswered;
+
+    // Initialize when page loads
+    window.addEventListener('load', () => {
+      console.log('� Initializing admin panel...');
+
+      // Tab switching - add click handlers
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+          console.log('Tab clicked:', tabName);
+          
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          this.classList.add('active');
+          document.getElementById(tabName).classList.add('active');
+        });
+      });
+
+      // Form submit
+      document.getElementById('faq-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const id = document.getElementById('faq-id').value;
+        const data = {
+          category: document.getElementById('category').value.trim(),
+          question: document.getElementById('question').value.trim(),
+          answer: document.getElementById('answer').value.trim(),
+          keywords: document.getElementById('keywords').value.split(',').map(k => k.trim()).filter(Boolean)
+        };
+        
+        // Validation
+        if (!data.category || !data.question || !data.answer) {
+          alert('Please fill in all required fields (Category, Question, Answer)');
+          return;
+        }
+        
+        try {
+          if (id) {
+            const res = await fetch(`/api/admin/faqs/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error('Failed to update FAQ');
+            showToast('FAQ updated successfully');
+          } else {
+            const res = await fetch('/api/admin/faqs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error('Failed to create FAQ');
+            showToast('FAQ created successfully');
+          }
+          
+          closeModal();
+          await loadFAQs();
+          await loadAnalytics();
+          await loadUnanswered();
+          
+          // Show success message
+          console.log(`✅ FAQ ${id ? 'updated' : 'created'} successfully`);
+        } catch (error) {
+          showToast('Error saving FAQ: ' + error.message, 'error');
+          console.error('Error saving FAQ:', error);
+        }
+      });
+
+      // Close modal on background click
+      document.getElementById('faq-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'faq-modal') closeModal();
+      });
+
+      // Load initial data
+      loadAnalytics();
+      loadFAQs();
+      loadUnanswered();
+
+      // Auto-refresh analytics every 30 seconds
+      setInterval(loadAnalytics, 30000);
+      
+      console.log('✅ Admin panel ready!');
+    });
+  </script>
+</body>
+</html>

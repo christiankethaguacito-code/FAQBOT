@@ -331,14 +331,28 @@
         </div>
         
         <div class="mb-6">
-          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">💬 Answer</label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">💬 Answer</label>
+            <button type="button" onclick="generateAIAnswer()" 
+                    class="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:shadow-md transition-all flex items-center gap-1.5">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"/></svg>
+              AI Generate
+            </button>
+          </div>
           <textarea id="answer" rows="6" required 
                     placeholder="Provide a clear, helpful answer..."
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base leading-relaxed resize-y"></textarea>
         </div>
         
         <div class="mb-6">
-          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">🏷️ Keywords (comma-separated)</label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">🏷️ Keywords (comma-separated)</label>
+            <button type="button" onclick="generateAIKeywords()" 
+                    class="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:shadow-md transition-all flex items-center gap-1.5">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"/></svg>
+              AI Generate
+            </button>
+          </div>
           <input type="text" id="keywords" 
                  placeholder="contact, email, reach, location"
                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base">
@@ -815,6 +829,89 @@
         if (e.target.id === 'faq-modal') closeModal();
       });
 
+      // AI-powered features
+      async function generateAIAnswer() {
+        const question = document.getElementById('question').value.trim();
+        const category = document.getElementById('category').value.trim();
+        
+        if (!question) {
+          alert('Please enter a question first!');
+          return;
+        }
+        
+        const answerField = document.getElementById('answer');
+        const originalPlaceholder = answerField.placeholder;
+        answerField.placeholder = '🤖 AI is generating an answer...';
+        answerField.disabled = true;
+        
+        try {
+          const res = await fetch('/api/admin/ai/generate-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, category: category || 'General' })
+          });
+          
+          if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Failed to generate answer');
+          }
+          
+          const data = await res.json();
+          answerField.value = data.answer;
+          showToast('✨ AI generated an answer!');
+        } catch (error) {
+          console.error('AI generation error:', error);
+          showToast('AI generation failed: ' + error.message, 'error');
+        } finally {
+          answerField.placeholder = originalPlaceholder;
+          answerField.disabled = false;
+          answerField.focus();
+        }
+      }
+
+      async function generateAIKeywords() {
+        const question = document.getElementById('question').value.trim();
+        const answer = document.getElementById('answer').value.trim();
+        
+        if (!question || !answer) {
+          alert('Please enter both question and answer first!');
+          return;
+        }
+        
+        const keywordsField = document.getElementById('keywords');
+        const originalPlaceholder = keywordsField.placeholder;
+        keywordsField.placeholder = '🤖 AI is generating keywords...';
+        keywordsField.disabled = true;
+        
+        try {
+          const res = await fetch('/api/admin/ai/generate-keywords', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, answer })
+          });
+          
+          if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Failed to generate keywords');
+          }
+          
+          const data = await res.json();
+          keywordsField.value = data.keywords.join(', ');
+          showToast('✨ AI generated keywords!');
+        } catch (error) {
+          console.error('AI generation error:', error);
+          showToast('AI generation failed: ' + error.message, 'error');
+        } finally {
+          keywordsField.placeholder = originalPlaceholder;
+          keywordsField.disabled = false;
+          keywordsField.focus();
+        }
+      }
+
+      // Make AI functions globally accessible
+      window.generateAIAnswer = generateAIAnswer;
+      window.generateAIKeywords = generateAIKeywords;
+
       // Load initial data
       loadAnalytics();
       loadFAQs();
@@ -822,6 +919,18 @@
 
       // Auto-refresh analytics every 30 seconds
       setInterval(loadAnalytics, 30000);
+      
+      // Check AI status
+      fetch('/api/admin/ai/status')
+        .then(res => res.json())
+        .then(data => {
+          if (data.enabled) {
+            console.log(`✅ AI Features enabled (${data.provider} - ${data.model})`);
+          } else {
+            console.log('ℹ️ AI Features disabled');
+          }
+        })
+        .catch(() => console.log('ℹ️ Could not check AI status'));
       
       console.log('✅ Admin panel ready!');
     });

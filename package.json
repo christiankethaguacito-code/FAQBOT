@@ -5,8 +5,8 @@
   "description": "A small FAQ bot with local matching and optional OpenAI fallback",
   "main": "src/index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
     "android:build": "npm run android:sync && npm run android:open"
@@ -20,7 +20,9 @@
     "@capacitor/core": "^7.4.4",
     "@capacitor/splash-screen": "^7.0.3",
     "better-sqlite3": "^12.4.1",
+    "dotenv": "^17.2.3",
     "express": "^4.18.2",
-    "google-auth-library": "^9.15.1"
+    "google-auth-library": "^9.15.1",
+    "groq-sdk": "^0.34.0"
   }
 }

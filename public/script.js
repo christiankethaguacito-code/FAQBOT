@@ -101,6 +101,37 @@ function showAnswer(data) {
     cta.classList.add('hidden');
   }
   
+  // Show AI badge if AI was used
+  if (data.source && data.source.includes('ai')) {
+    const aiBadge = document.createElement('span');
+    aiBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-xs font-semibold ml-2';
+    aiBadge.innerHTML = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"/></svg> AI Enhanced';
+    $('#meta').appendChild(aiBadge);
+  }
+  
+  // Show related FAQs if available
+  if (data.relatedFAQs && data.relatedFAQs.length > 0) {
+    const relatedSection = document.createElement('div');
+    relatedSection.className = 'mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200';
+    relatedSection.innerHTML = `
+      <h3 class="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/></svg>
+        You might also want to know:
+      </h3>
+      <div class="space-y-2">
+        ${data.relatedFAQs.map(faq => `
+          <button onclick="document.getElementById('question').value='${faq.question.replace(/'/g, "\\'")}'; handleAsk();" 
+                  class="w-full text-left px-3 py-2 bg-white hover:bg-purple-50 rounded-lg border border-purple-200 hover:border-purple-400 transition-all text-sm text-gray-700 hover:text-purple-900 flex items-start gap-2 group">
+            <span class="text-purple-500 text-xs mt-0.5">•</span>
+            <span class="flex-1">${faq.question}</span>
+            <svg class="w-4 h-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    $('#result').appendChild(relatedSection);
+  }
+  
   // Show result with Tailwind classes
   const result = $('#result');
   result.classList.remove('hidden');

@@ -317,7 +317,7 @@ app.get('/api/chat/history/:sessionId', (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`✅ Student FAQ Bot running at http://localhost:${PORT}`);
   console.log(`📖 Open your browser and visit the URL above`);

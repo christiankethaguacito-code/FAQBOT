@@ -17,36 +17,48 @@
               secondary: '#764ba2',
             },
             animation: {
-              'slide-in': 'slideIn 0.5s ease',
-              'fade-in': 'fadeIn 0.5s ease',
-              'slide-up': 'slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              'pulse-glow': 'pulse 2s infinite',
-              'shake': 'shake 0.4s ease',
+              'slide-in': 'slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              'shake': 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)',
+              'bounce-subtle': 'bounceSubtle 0.6s ease-out',
+              'scale-in': 'scaleIn 0.3s ease-out',
             },
             keyframes: {
               slideIn: {
-                '0%': { opacity: '0', transform: 'translateY(30px)' },
+                '0%': { opacity: '0', transform: 'translateY(40px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               slideUp: {
-                '0%': { transform: 'translateY(50px) scale(0.95)', opacity: '0' },
+                '0%': { transform: 'translateY(60px) scale(0.9)', opacity: '0' },
                 '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
               },
               shake: {
                 '0%, 100%': { transform: 'translateX(0)' },
-                '25%': { transform: 'translateX(-5px)' },
-                '75%': { transform: 'translateX(5px)' },
+                '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+                '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+              },
+              bounceSubtle: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-8px)' },
+              },
+              scaleIn: {
+                '0%': { transform: 'scale(0.9)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
               },
             },
+            boxShadow: {
+              'glow': '0 0 20px rgba(102, 126, 234, 0.3)',
+              'glow-lg': '0 0 30px rgba(102, 126, 234, 0.5)',
+            }
           }
         }
       }
     </script>
-    <style>
     <style>
       @keyframes spin {
         0% { transform: rotate(0deg); }
@@ -69,11 +81,14 @@
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        transition: left 0.3s ease;
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 0;
       }
       .quick-btn-gradient:hover::before {
         left: 0;
+      }
+      .quick-btn-gradient:active {
+        transform: scale(0.98);
       }
       .ripple::before {
         content: '';
@@ -83,154 +98,274 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.3);
         transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
+        transition: width 0.6s ease-out, height 0.6s ease-out;
       }
       .ripple:hover::before {
-        width: 300px;
-        height: 300px;
+        width: 400px;
+        height: 400px;
+      }
+      .ripple:active::before {
+        width: 0;
+        height: 0;
+        transition: 0s;
+      }
+      /* Smooth focus styles */
+      textarea:focus, input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 0 20px rgba(102, 126, 234, 0.15);
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
       }
     </style>
   </head>
-  <body class="bg-gradient-to-br from-primary to-secondary min-h-screen p-4 md:p-6 lg:p-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl lg:rounded-3xl shadow-2xl p-6 md:p-10 lg:p-12 animate-slide-in">
+  <body class="bg-gradient-to-br from-primary via-purple-500 to-secondary min-h-screen p-4 md:p-6 lg:p-8 overflow-x-hidden">
+    <!-- Background decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div class="relative max-w-5xl mx-auto bg-white/95 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-2xl p-6 md:p-10 lg:p-12 animate-slide-in">
       <!-- Header -->
-      <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
-        🎓 SKSU Student Body Organization
-      </h1>
-      <p class="text-gray-600 text-sm md:text-base mb-8 flex items-center gap-2 flex-wrap">
-        <span>📍</span>
-        <span>Sultan Kudarat State University - Isulan Campus | 24/7 FAQ Assistant</span>
-      </p>
+      <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-primary via-purple-600 to-secondary bg-clip-text text-transparent mb-3 leading-tight">
+          🎓 SKSU Student Body Organization
+        </h1>
+        <p class="text-gray-600 text-sm md:text-base flex items-center gap-2 flex-wrap">
+          <span class="text-lg">📍</span>
+          <span class="font-medium">Sultan Kudarat State University - Isulan Campus</span>
+          <span class="hidden sm:inline text-gray-400">|</span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs md:text-sm font-semibold">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            24/7 AI Assistant
+          </span>
+        </p>
+      </div>
 
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <button class="quick-btn-gradient relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[70px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-xl group" 
+        <button class="quick-btn-gradient group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[80px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-glow active:translate-y-0" 
                 data-question="How do I contact the SBO?">
-          <strong class="block text-base md:text-lg mb-1 relative z-10 group-hover:text-white">✉️ Contact Us</strong>
-          <span class="text-sm opacity-80 relative z-10 group-hover:text-white">Email & location</span>
+          <strong class="block text-base md:text-lg mb-1.5 relative z-10 transition-colors font-bold">
+            <span class="mr-2">✉️</span>Contact Us
+          </strong>
+          <span class="text-sm opacity-70 relative z-10 transition-colors">Email & location</span>
         </button>
-        <button class="quick-btn-gradient relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[70px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-xl group" 
+        <button class="quick-btn-gradient group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[80px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-glow active:translate-y-0" 
                 data-question="What events does SBO organize?">
-          <strong class="block text-base md:text-lg mb-1 relative z-10 group-hover:text-white">📅 Events</strong>
-          <span class="text-sm opacity-80 relative z-10 group-hover:text-white">Assemblies & programs</span>
+          <strong class="block text-base md:text-lg mb-1.5 relative z-10 transition-colors font-bold">
+            <span class="mr-2">📅</span>Events
+          </strong>
+          <span class="text-sm opacity-70 relative z-10 transition-colors">Assemblies & programs</span>
         </button>
-        <button class="quick-btn-gradient relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[70px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-xl group" 
+        <button class="quick-btn-gradient group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[80px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-glow active:translate-y-0" 
                 data-question="Where can I download the Student Manual?">
-          <strong class="block text-base md:text-lg mb-1 relative z-10 group-hover:text-white">📖 Student Manual</strong>
-          <span class="text-sm opacity-80 relative z-10 group-hover:text-white">Download PDF</span>
+          <strong class="block text-base md:text-lg mb-1.5 relative z-10 transition-colors font-bold">
+            <span class="mr-2">📖</span>Student Manual
+          </strong>
+          <span class="text-sm opacity-70 relative z-10 transition-colors">Download PDF</span>
         </button>
-        <button class="quick-btn-gradient relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[70px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-xl group" 
+        <button class="quick-btn-gradient group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[80px] flex flex-col justify-center text-left transition-all duration-300 hover:text-white hover:border-primary hover:-translate-y-1 hover:shadow-glow active:translate-y-0" 
                 data-question="Who are the SBO officers?">
-          <strong class="block text-base md:text-lg mb-1 relative z-10 group-hover:text-white">👥 Our Officers</strong>
-          <span class="text-sm opacity-80 relative z-10 group-hover:text-white">Meet the team</span>
+          <strong class="block text-base md:text-lg mb-1.5 relative z-10 transition-colors font-bold">
+            <span class="mr-2">👥</span>Our Officers
+          </strong>
+          <span class="text-sm opacity-70 relative z-10 transition-colors">Meet the team</span>
         </button>
       </div>
 
       <!-- Question Input -->
-      <div class="mb-4">
-        <label class="block text-xs md:text-sm font-bold text-primary uppercase tracking-wide mb-3">Ask Your Question</label>
-        <textarea 
-          id="question" 
-          class="w-full min-h-[100px] md:min-h-[120px] p-4 md:p-5 border-3 border-gray-200 rounded-xl text-base md:text-lg resize-y focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" 
-          placeholder="Ask anything! Try: 'When are midterms?', 'How do I register for Innovation Sprints?', 'What services does SBO provide?'"
-        ></textarea>
+      <div class="mb-5 animate-fade-in" style="animation-delay: 0.1s">
+        <label class="block text-xs md:text-sm font-bold text-primary uppercase tracking-wide mb-3 flex items-center gap-2">
+          <span>💬</span>
+          <span>Ask Your Question</span>
+        </label>
+        <div class="relative">
+          <textarea 
+            id="question" 
+            class="w-full min-h-[110px] md:min-h-[130px] p-4 md:p-5 border-2 border-gray-200 rounded-xl text-base md:text-lg resize-y transition-all duration-300 hover:border-gray-300 focus:border-primary focus:shadow-glow placeholder-gray-400" 
+            placeholder="💭 Ask anything! Try: 'When are midterms?', 'How do I register for Innovation Sprints?', 'What services does SBO provide?'"
+            rows="4"
+          ></textarea>
+          <div class="absolute bottom-3 right-3 text-xs text-gray-400 pointer-events-none">
+            <kbd class="px-2 py-1 bg-gray-100 rounded border border-gray-300">Enter</kbd> to submit
+          </div>
+        </div>
       </div>
 
       <!-- Buttons -->
-      <div class="flex gap-3 md:gap-4 flex-wrap">
+      <div class="flex gap-3 md:gap-4 flex-wrap animate-fade-in" style="animation-delay: 0.2s">
         <button 
           id="ask" 
-          class="ripple relative overflow-hidden flex-1 min-w-[120px] bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-xl shadow-lg hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+          class="ripple relative overflow-hidden flex-1 min-w-[140px] bg-gradient-to-r from-primary via-purple-600 to-secondary text-white font-bold py-3.5 md:py-4 px-6 md:px-8 rounded-xl shadow-lg hover:-translate-y-1 hover:shadow-glow-lg active:translate-y-0 transition-all duration-300 group"
         >
-          <span class="relative z-10">Ask Question</span>
+          <span class="relative z-10 flex items-center justify-center gap-2">
+            <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            Ask Question
+          </span>
         </button>
         <button 
           id="clear" 
-          class="bg-white text-gray-600 font-bold py-3 md:py-4 px-6 md:px-8 rounded-xl border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 min-w-[120px]"
+          class="bg-white text-gray-700 font-bold py-3.5 md:py-4 px-6 md:px-8 rounded-xl border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-300 min-w-[120px] flex items-center justify-center gap-2 group"
         >
+          <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
           Clear
         </button>
       </div>
 
       <!-- Answer Section -->
-      <div id="result" class="hidden mt-8 p-6 md:p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 animate-fade-in">
-        <div class="flex items-center gap-3 mb-5 pb-4 border-b-2 border-indigo-200 flex-wrap">
-          <span id="badge" class="inline-block px-4 py-2 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide"></span>
+      <div id="result" class="hidden mt-8 p-6 md:p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 shadow-lg animate-fade-in">
+        <div class="flex items-center gap-3 mb-5 pb-5 border-b-2 border-indigo-200 flex-wrap">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-lg animate-bounce-subtle">
+              ✨
+            </div>
+            <span id="badge" class="inline-block px-4 py-2 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide shadow-sm"></span>
+          </div>
         </div>
-        <div id="answerText" class="text-base md:text-lg leading-relaxed text-gray-800"></div>
-        <div id="meta" class="mt-5 pt-5 border-t-2 border-indigo-200 text-gray-600 text-sm md:text-base flex justify-between items-center flex-wrap gap-4"></div>
-        <div id="contactCta" class="hidden mt-6 p-5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border-2 border-yellow-300">
-          <strong class="block mb-3 text-yellow-800 text-base md:text-lg">Still have questions?</strong>
-          <p class="text-sm md:text-base text-gray-700">
-            Visit us: Learning Commons, 2nd floor | Email: <a href="mailto:sksustudentbodyorganizationisu@gmail.com" class="text-primary font-bold hover:text-secondary hover:underline">sksustudentbodyorganizationisu@gmail.com</a> | <a href="https://sboweb.vercel.app" target="_blank" class="text-primary font-bold hover:text-secondary hover:underline">Visit our website</a>
-          </p>
+        <div id="answerText" class="text-base md:text-lg leading-relaxed text-gray-800 mb-5"></div>
+        <div id="meta" class="pt-5 border-t-2 border-indigo-200 text-gray-600 text-sm md:text-base">
+          <!-- Confidence bar will be inserted here -->
+          <div class="flex items-center gap-4 flex-wrap">
+            <div class="flex-1 min-w-[200px]">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Confidence</span>
+                <span id="confidenceText" class="text-sm font-bold text-primary">0%</span>
+              </div>
+              <div class="h-2.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                <div id="confidenceFill" class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000 ease-out shadow-sm" style="width: 0%"></div>
+              </div>
+            </div>
+            <div id="category" class="text-sm"></div>
+          </div>
+        </div>
+        <div id="contactCta" class="hidden mt-6 p-5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border-2 border-yellow-300 shadow-sm animate-scale-in">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">💡</div>
+            <div class="flex-1">
+              <strong class="block mb-2 text-yellow-800 text-base md:text-lg font-bold">Still have questions?</strong>
+              <p class="text-sm md:text-base text-gray-700 leading-relaxed">
+                <span class="block mb-2"><strong>📍 Visit us:</strong> Learning Commons, 2nd floor</span>
+                <span class="block mb-2"><strong>📧 Email:</strong> <a href="mailto:sksustudentbodyorganizationisu@gmail.com" class="text-primary font-bold hover:text-secondary hover:underline transition-colors">sksustudentbodyorganizationisu@gmail.com</a></span>
+                <span class="block"><strong>🌐 Website:</strong> <a href="https://sboweb.vercel.app" target="_blank" class="text-primary font-bold hover:text-secondary hover:underline transition-colors inline-flex items-center gap-1">
+                  Visit our website
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </a></span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Admin Login Button -->
     <button 
-      class="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-gradient-to-br from-primary to-secondary text-white rounded-full w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl shadow-xl hover:scale-110 hover:rotate-12 hover:shadow-2xl active:scale-95 transition-all duration-300 z-50 flex items-center justify-center group"
+      class="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-gradient-to-br from-primary via-purple-600 to-secondary text-white rounded-full w-16 h-16 md:w-18 md:h-18 text-2xl md:text-3xl shadow-xl hover:scale-110 hover:rotate-12 active:scale-95 transition-all duration-300 z-50 flex items-center justify-center group animate-bounce-subtle"
       onclick="showAdminLogin()" 
       title="Admin Login"
+      style="box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);"
     >
-      <span class="relative z-10">🔐</span>
-      <span class="absolute right-full mr-4 bg-black/90 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 pointer-events-none hidden md:block">
-        Admin Login
+      <span class="relative z-10 animate-pulse">🔐</span>
+      <span class="absolute right-full mr-4 bg-gray-900/95 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-3 group-hover:translate-x-0 transition-all duration-300 pointer-events-none hidden md:block shadow-lg">
+        <span class="flex items-center gap-2">
+          <span>🔑</span>
+          Admin Login
+        </span>
       </span>
+      <!-- Glow effect -->
+      <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-300"></div>
     </button>
 
     <!-- Admin Login Modal -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] items-center justify-center p-4" onclick="closeModalOnOutsideClick(event)">
-      <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-slide-up relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary"></div>
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[100] items-center justify-center p-4" onclick="closeModalOnOutsideClick(event)">
+      <div class="bg-white rounded-2xl p-8 md:p-10 max-w-md w-full shadow-2xl animate-slide-up relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-purple-600 to-secondary"></div>
         
-        <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2 flex items-center gap-2">
-          🔐 Admin Access
-        </h2>
-        <p class="text-gray-600 text-sm md:text-base mb-6">Enter your credentials to access the admin panel</p>
+        <!-- Close button -->
+        <button onclick="closeAdminLogin()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
         
-        <div class="relative mb-4">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">👤</span>
-          <input 
-            type="text" 
-            id="admin-username" 
-            placeholder="Username" 
-            autocomplete="username"
-            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-          >
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-3xl animate-bounce-subtle">
+            🔐
+          </div>
+          <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-purple-600 to-secondary bg-clip-text text-transparent mb-2">
+            Admin Access
+          </h2>
+          <p class="text-gray-600 text-sm md:text-base">Enter your credentials to access the admin panel</p>
         </div>
         
-        <div class="relative mb-4">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔑</span>
-          <input 
-            type="password" 
-            id="admin-password" 
-            placeholder="Password" 
-            autocomplete="current-password"
-            onkeypress="handleEnterKey(event)"
-            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-          >
+        <div class="space-y-4">
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">👤</span>
+            <input 
+              type="text" 
+              id="admin-username" 
+              placeholder="Username" 
+              autocomplete="username"
+              class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-base transition-all hover:border-gray-300 focus:border-primary"
+            >
+          </div>
+          
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">🔑</span>
+            <input 
+              type="password" 
+              id="admin-password" 
+              placeholder="Password" 
+              autocomplete="current-password"
+              onkeypress="handleEnterKey(event)"
+              class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-base transition-all hover:border-gray-300 focus:border-primary"
+            >
+          </div>
         </div>
         
-        <div id="login-error" class="hidden text-red-600 text-sm md:text-base mt-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-600 animate-shake">
-          ❌ Invalid credentials. Please try again.
+        <div id="login-error" class="hidden text-red-600 text-sm md:text-base mt-4 p-4 bg-red-50 rounded-xl border-l-4 border-red-500 animate-shake flex items-start gap-3">
+          <span class="text-xl flex-shrink-0">⚠️</span>
+          <span class="flex-1">Invalid credentials. Please try again.</span>
         </div>
         
         <div class="flex gap-3 mt-6">
           <button 
-            class="flex-1 bg-gray-100 text-gray-600 font-semibold py-3 px-6 rounded-xl border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-all" 
+            class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3.5 px-6 rounded-xl border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300 active:bg-gray-300 transition-all" 
             onclick="closeAdminLogin()"
           >
             Cancel
           </button>
           <button 
-            class="ripple relative overflow-hidden flex-1 bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 px-6 rounded-xl hover:-translate-y-1 hover:shadow-xl transition-all" 
+            class="ripple relative overflow-hidden flex-1 bg-gradient-to-r from-primary via-purple-600 to-secondary text-white font-semibold py-3.5 px-6 rounded-xl hover:-translate-y-1 hover:shadow-glow-lg active:translate-y-0 transition-all" 
             onclick="adminLogin()"
           >
-            <span class="relative z-10">Login</span>
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+              </svg>
+              Login
+            </span>
           </button>
         </div>
       </div>

@@ -1,14 +1,14 @@
-import express from 'express';
 import dotenv from 'dotenv';
+// Load environment variables FIRST (before any other imports that need them)
+dotenv.config();
+
+import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { faqOps, analyticsOps, chatOps } from './db.js';
 import groqAI from './services/groq-ai.js';
-
-// Load environment variables
-dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();

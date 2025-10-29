@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SBO Admin Panel - FAQ Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#667eea',
+            secondary: '#764ba2',
+          }
+        }
+      }
+    }
+  </script>
   <style>
     * { box-sizing: border-box; }
     
@@ -14,342 +27,44 @@
       background: #f5f5f5;
     }
     
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1rem 1.5rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .header-content {
-      flex: 1;
-      min-width: 200px;
-    }
-    
-    .header h1 {
-      margin: 0;
-      font-size: clamp(1.25rem, 4vw, 1.75rem);
-    }
-    
-    .header p {
-      margin: 0.5rem 0 0 0;
-      opacity: 0.9;
-      font-size: clamp(0.85rem, 2vw, 1rem);
-    }
-    
-    .nav {
-      background: white;
-      padding: 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      overflow-x: auto;
-      white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    .nav button {
-      padding: 0.875rem 1.5rem;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: clamp(0.9rem, 2vw, 1rem);
-      font-weight: 600;
-      color: #666;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-    
-    .nav button.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
-    }
-    
-    .nav button:hover {
-      background: #f9f9f9;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 1rem auto;
-      padding: 0 1rem;
-    }
-    
+    /* Minimal custom styles */
     .tab-content {
       display: none;
     }
-    
     .tab-content.active {
       display: block;
     }
-    
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      transition: transform 0.2s;
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-5px);
-    }
-    
-    .stat-card h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: clamp(2rem, 6vw, 2.5rem);
-      font-weight: 700;
-    }
-    
-    .stat-card p {
-      margin: 0;
-      opacity: 0.95;
-      font-size: clamp(0.85rem, 2vw, 0.9rem);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: clamp(0.85rem, 2vw, 0.95rem);
-      display: block;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    table thead,
-    table tbody,
-    table tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-    
-    th, td {
-      padding: 0.875rem 0.5rem;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-      word-wrap: break-word;
-    }
-    
-    th {
-      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-      font-weight: 700;
+    .tab-btn.active {
       color: #667eea;
-      text-transform: uppercase;
-      font-size: clamp(0.7rem, 1.8vw, 0.75rem);
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid #667eea;
-    }
-    
-    tbody tr {
-      transition: background 0.2s;
-    }
-    
-    tbody tr:hover {
-      background: #f8f9ff;
-    }
-    
-    .btn {
-      padding: 0.6rem 1.25rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: clamp(0.85rem, 2vw, 0.95rem);
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      white-space: nowrap;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
-    }
-    
-    .btn-danger {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-    }
-    
-    .btn-danger:hover {
-      background: linear-gradient(135deg, #e082ea 0%, #e4465b 100%);
-    }
-    
-    .btn-small {
-      padding: 0.35rem 0.875rem;
-      font-size: clamp(0.8rem, 1.8vw, 0.85rem);
-      margin: 0 0.25rem;
-    }
-    
-    input, textarea, select {
-      width: 100%;
-      padding: 0.875rem;
-      border: 2px solid #e8e8e8;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: clamp(0.95rem, 2vw, 1rem);
-      margin-bottom: 1rem;
-      transition: all 0.3s ease;
-    }
-    
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.6rem;
-      font-weight: 700;
-      color: #333;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-group {
-      margin-bottom: 1.5rem;
+      border-bottom-color: #667eea;
     }
     .modal {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     .modal.active {
       display: flex;
     }
-    .modal-content {
-      background: white;
-      border-radius: 16px;
-      padding: 2.5rem;
-      max-width: 650px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: slideUp 0.3s ease;
-    }
-    @keyframes slideUp {
-      from { 
-        transform: translateY(50px);
-        opacity: 0;
-      }
-      to { 
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-    .modal-header h2 {
-      margin: 0;
-    }
-    .close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #999;
-    }
-    .close:hover {
-      color: #333;
-    }
     .tag {
       display: inline-block;
-      padding: 0.4rem 0.8rem;
-      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 0.25rem 0.75rem;
+      background: linear-gradient(135deg, #667eea15, #764ba215);
+      border: 1px solid #667eea40;
       color: #667eea;
-      border-radius: 20px;
-      margin-right: 0.4rem;
-      margin-bottom: 0.4rem;
-      font-size: 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
       font-weight: 600;
-      border: 1px solid #d1c4e9;
-    }
-    .card h2 {
-      color: #333;
-      font-size: 1.5rem;
-      margin: 0 0 1.5rem 0;
-      padding-bottom: 1rem;
-      border-bottom: 3px solid #667eea;
-      display: inline-block;
-    }
-    .faq-question {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 0.25rem;
+      margin: 0.125rem;
     }
     .empty-state {
       text-align: center;
-      padding: 3rem;
+      padding: 3rem 1rem !important;
       color: #999;
     }
     .empty-state-icon {
-      font-size: 4rem;
+      font-size: 3rem;
       margin-bottom: 1rem;
     }
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    /* Toast notifications */
     .toast {
       position: fixed;
       bottom: 2rem;
@@ -368,233 +83,223 @@
     .toast.error {
       border-left-color: #f44336;
     }
-    @keyframes slideInRight {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    @keyframes slideOutRight {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-    }
     .toast.hiding {
       animation: slideOutRight 0.3s ease;
     }
-    
-    /* Responsive breakpoints */
-    @media (min-width: 480px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    /* Animations */
+    @keyframes slideInRight {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    
-    @media (min-width: 768px) {
-      .header {
-        padding: 1.5rem 2rem;
-      }
-      
-      .container {
-        margin: 2rem auto;
-      }
-      
-      .card {
-        padding: 2rem;
-      }
-      
-      .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-      }
-      
-      .stat-card {
-        padding: 2rem;
-      }
-      
-      th, td {
-        padding: 1rem 0.75rem;
-      }
-      
-      .btn {
-        padding: 0.6rem 1.5rem;
-      }
-      
-      .btn-small {
-        padding: 0.4rem 1rem;
-      }
-      
-      input, textarea, select {
-        padding: 0.9rem;
-      }
-      
-      .modal-content {
-        padding: 2.5rem;
-      }
+    @keyframes slideOutRight {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
     }
-    
-    @media (max-width: 767px) {
-      .header > div {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 1rem;
-      }
-      
-      table {
-        font-size: 0.85rem;
-      }
-      
-      th, td {
-        padding: 0.75rem 0.4rem;
-      }
-      
-      .btn-small {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-      }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px;
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <div class="header-content">
-      <h1>🛠️ SBO Admin Panel</h1>
-      <p>Manage FAQs, view analytics, and monitor student questions</p>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-primary to-secondary text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-1 md:mb-2">
+            🛠️ SBO Admin Panel
+          </h1>
+          <p class="text-sm md:text-base opacity-90">
+            Manage FAQs, view analytics, and monitor student questions
+          </p>
+        </div>
+        <button 
+          onclick="logout()" 
+          class="bg-white/20 hover:bg-white/30 border-2 border-white/30 text-white px-6 py-2.5 md:py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg active:scale-95 whitespace-nowrap self-start sm:self-auto"
+        >
+          🚪 Logout
+        </button>
+      </div>
     </div>
-    <button onclick="logout()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 0.7rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
-      🚪 Logout
-    </button>
   </div>
 
-  <div class="nav">
-    <button class="tab-btn active" data-tab="analytics">📊 Analytics</button>
-    <button class="tab-btn" data-tab="faqs">📝 Manage FAQs</button>
-    <button class="tab-btn" data-tab="unanswered">❓ Unanswered Questions</button>
+  <!-- Navigation -->
+  <div class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto">
+      <nav class="flex overflow-x-auto">
+        <button class="tab-btn flex-shrink-0 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-semibold text-gray-600 border-b-3 border-transparent transition-all hover:bg-gray-50 active" data-tab="analytics">
+          <span class="flex items-center gap-2">
+            <span>📊</span>
+            <span class="hidden sm:inline">Analytics</span>
+          </span>
+        </button>
+        <button class="tab-btn flex-shrink-0 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-semibold text-gray-600 border-b-3 border-transparent transition-all hover:bg-gray-50" data-tab="faqs">
+          <span class="flex items-center gap-2">
+            <span>📝</span>
+            <span>Manage FAQs</span>
+          </span>
+        </button>
+        <button class="tab-btn flex-shrink-0 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-semibold text-gray-600 border-b-3 border-transparent transition-all hover:bg-gray-50" data-tab="unanswered">
+          <span class="flex items-center gap-2">
+            <span>❓</span>
+            <span class="hidden sm:inline">Unanswered</span>
+          </span>
+        </button>
+      </nav>
+    </div>
   </div>
 
-  <div class="container">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
     <!-- Analytics Tab -->
     <div id="analytics" class="tab-content active">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3 id="total-queries">-</h3>
-          <p>Total Queries (30 days)</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-xl transition-shadow">
+          <div class="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2" id="total-queries">-</div>
+          <div class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Queries (30 days)</div>
         </div>
-        <div class="stat-card">
-          <h3 id="unique-users">-</h3>
-          <p>Unique Users</p>
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-xl transition-shadow">
+          <div class="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2" id="unique-users">-</div>
+          <div class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide">Unique Users</div>
         </div>
-        <div class="stat-card">
-          <h3 id="avg-score">-</h3>
-          <p>Avg Confidence</p>
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-xl transition-shadow">
+          <div class="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2" id="avg-score">-</div>
+          <div class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide">Avg Confidence</div>
         </div>
-        <div class="stat-card">
-          <h3 id="low-conf">-</h3>
-          <p>Low Confidence</p>
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-xl transition-shadow">
+          <div class="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2" id="low-conf">-</div>
+          <div class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide">Low Confidence</div>
         </div>
       </div>
 
-      <div class="card">
-        <h2>🔥 Top 20 Questions</h2>
-        <table id="top-questions-table">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Times Asked</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8 mb-6 md:mb-8">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">🔥 Top 20 Questions</h2>
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+          <div class="inline-block min-w-full align-middle px-4 md:px-0">
+            <table id="top-questions-table" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Question</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Times Asked</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>📈 FAQ Usage</h2>
-        <table id="faq-usage-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Question</th>
-              <th>Times Matched</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">📈 FAQ Usage</h2>
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+          <div class="inline-block min-w-full align-middle px-4 md:px-0">
+            <table id="faq-usage-table" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Category</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Question</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Times Matched</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- FAQs Tab -->
     <div id="faqs" class="tab-content">
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-          <h2 style="margin: 0; border: none;">📝 All FAQs</h2>
-          <button class="btn btn-primary" onclick="showAddModal()">
-            <span style="font-size: 1.2rem;">+</span> Add New FAQ
+      <div class="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800">📝 All FAQs</h2>
+          <button class="bg-gradient-to-r from-primary to-secondary text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all active:scale-95" onclick="showAddModal()">
+            <span class="text-lg md:text-xl">+</span> Add New FAQ
           </button>
         </div>
         
-        <div style="margin-bottom: 1.5rem;">
-          <input type="text" id="faq-search" placeholder="🔍 Search FAQs by category, question, or keywords..." 
-                 style="width: 100%; padding: 0.9rem; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 1rem;"
+        <div class="mb-4 md:mb-6">
+          <input type="text" id="faq-search" 
+                 placeholder="🔍 Search FAQs by category, question, or keywords..." 
+                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm md:text-base focus:border-primary focus:outline-none transition-colors"
                  oninput="filterFAQs(this.value)">
         </div>
         
-        <table id="faqs-table">
-          <thead>
-            <tr>
-              <th style="width: 12%;">Category</th>
-              <th style="width: 30%;">Question</th>
-              <th style="width: 25%;">Keywords</th>
-              <th style="width: 18%;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="4" style="text-align: center; padding: 2rem; color: #999;">
-                <div class="empty-state-icon">📋</div>
-                <p>Loading FAQs...</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+          <div class="inline-block min-w-full align-middle px-4 md:px-0">
+            <table id="faqs-table" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Category</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Question</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Keywords</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm md:text-base">Loading FAQs...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Unanswered Questions Tab -->
     <div id="unanswered" class="tab-content">
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-          <h2 style="margin: 0; border: none;">❓ Unanswered Questions</h2>
-          <button class="btn btn-primary" onclick="refreshUnanswered()">
+      <div class="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800">❓ Unanswered Questions</h2>
+          <button class="bg-gradient-to-r from-primary to-secondary text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all active:scale-95" onclick="refreshUnanswered()">
             🔄 Refresh
           </button>
         </div>
-        <p style="color: #666; margin-bottom: 1.5rem;">
+        <p class="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
           Questions with low confidence scores (&lt;30%) that may need new FAQs. Click "Create FAQ" to add them to the database.
         </p>
-        <table id="unanswered-table">
-          <thead>
-            <tr>
-              <th style="width: 40%;">Question</th>
-              <th style="width: 12%;">Confidence</th>
-              <th style="width: 12%;">Times Asked</th>
-              <th style="width: 18%;">Timestamp</th>
-              <th style="width: 18%;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">
-                <div class="empty-state-icon">🔍</div>
-                <p>Loading unanswered questions...</p>
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+          <div class="inline-block min-w-full align-middle px-4 md:px-0">
+            <table id="unanswered-table" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Question</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Confidence</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Times Asked</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">Timestamp</th>
+                  <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                    <div class="text-4xl mb-2">🔍</div>
+                    <p class="text-sm md:text-base">Loading unanswered questions...</p>
               </td>
             </tr>
           </tbody>
@@ -604,50 +309,50 @@
   </div>
 
   <!-- Add/Edit FAQ Modal -->
-  <div id="faq-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modal-title" style="margin: 0; color: #667eea;">Add New FAQ</h2>
-        <button class="close" onclick="closeModal()" style="font-size: 2rem; color: #999; transition: color 0.2s;">&times;</button>
+  <div id="faq-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 md:p-10 max-w-2xl w-11/12 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-start mb-6 md:mb-8">
+        <h2 id="modal-title" class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Add New FAQ</h2>
+        <button onclick="closeModal()" class="text-4xl text-gray-400 hover:text-gray-600 transition-colors leading-none">&times;</button>
       </div>
-      <form id="faq-form" style="margin-top: 2rem;">
+      <form id="faq-form">
         <input type="hidden" id="faq-id">
         
-        <div class="form-group">
-          <label>📂 Category</label>
+        <div class="mb-6">
+          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">📂 Category</label>
           <input type="text" id="category" required placeholder="e.g., Events, Contact, Services" 
-                 style="font-size: 1rem;">
+                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base">
         </div>
         
-        <div class="form-group">
-          <label>❓ Question</label>
+        <div class="mb-6">
+          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">❓ Question</label>
           <input type="text" id="question" required placeholder="What do students ask?" 
-                 style="font-size: 1rem;">
+                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base">
         </div>
         
-        <div class="form-group">
-          <label>💬 Answer</label>
+        <div class="mb-6">
+          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">💬 Answer</label>
           <textarea id="answer" rows="6" required 
                     placeholder="Provide a clear, helpful answer..."
-                    style="font-size: 1rem; line-height: 1.6;"></textarea>
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base leading-relaxed resize-y"></textarea>
         </div>
         
-        <div class="form-group">
-          <label>🏷️ Keywords (comma-separated)</label>
+        <div class="mb-6">
+          <label class="block mb-2 font-bold text-gray-700 text-xs md:text-sm uppercase tracking-wide">🏷️ Keywords (comma-separated)</label>
           <input type="text" id="keywords" 
                  placeholder="contact, email, reach, location"
-                 style="font-size: 1rem;">
-          <small style="color: #999; font-size: 0.85rem;">
+                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors text-sm md:text-base">
+          <small class="text-gray-500 text-xs md:text-sm mt-1 block">
             These help match user questions more accurately
           </small>
         </div>
         
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-          <button type="submit" class="btn btn-primary" style="flex: 1;">
+        <div class="flex gap-3 md:gap-4 mt-8">
+          <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all active:scale-95 text-sm md:text-base">
             💾 Save FAQ
           </button>
-          <button type="button" class="btn" onclick="closeModal()" 
-                  style="flex: 1; background: #e0e0e0; color: #666;">
+          <button type="button" onclick="closeModal()" 
+                  class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all active:scale-95 text-sm md:text-base">
             Cancel
           </button>
         </div>
@@ -724,18 +429,18 @@
       
         const topQuestionsBody = document.querySelector('#top-questions-table tbody');
         topQuestionsBody.innerHTML = data.topQuestions.map(q => `
-          <tr>
-            <td>${q.question}</td>
-            <td><strong>${q.count}</strong></td>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-800">${q.question}</td>
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-bold text-primary">${q.count}</td>
           </tr>
         `).join('');
         
         const faqUsageBody = document.querySelector('#faq-usage-table tbody');
         faqUsageBody.innerHTML = data.faqUsage.map(f => `
-          <tr>
-            <td><span class="tag">${f.category || 'General'}</span></td>
-            <td>${f.question}</td>
-            <td><strong>${f.times_matched}</strong></td>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm"><span class="tag">${f.category || 'General'}</span></td>
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-800">${f.question}</td>
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-bold text-primary">${f.times_matched}</td>
           </tr>
         `).join('');
         console.log('✅ Analytics loaded');
@@ -766,26 +471,26 @@
           `;
         } else {
           tbody.innerHTML = currentFaqs.map(faq => `
-            <tr>
-              <td>
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
                 <span class="tag">${faq.category || 'General'}</span>
               </td>
-              <td>
-                <div class="faq-question">${faq.question}</div>
-                <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
-                  ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
+                <div class="font-semibold text-gray-800 mb-1">${faq.question}</div>
+                <div class="text-xs text-gray-600 leading-relaxed hidden sm:block">
+                  ${faq.answer.substring(0, 100)}${faq.answer.length > 100 ? '...' : ''}
                 </div>
               </td>
-              <td>
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm hidden lg:table-cell">
                 ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
                 ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
               </td>
-              <td>
-                <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
-                  ✏️ Edit
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm whitespace-nowrap">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mr-1 mb-1" onclick="editFAQ(${faq.id})" title="Edit">
+                  ✏️ <span class="hidden md:inline">Edit</span>
                 </button>
-                <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
-                  🗑️ Delete
+                <button class="bg-red-500 hover:bg-red-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mb-1" onclick="deleteFAQ(${faq.id})" title="Delete">
+                  🗑️ <span class="hidden md:inline">Delete</span>
                 </button>
               </td>
             </tr>
@@ -818,26 +523,26 @@
       if (!term) {
         // Show all FAQs if search is empty
         tbody.innerHTML = currentFaqs.map(faq => `
-          <tr>
-            <td>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
               <span class="tag">${faq.category || 'General'}</span>
             </td>
-            <td>
-              <div class="faq-question">${faq.question}</div>
-              <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
-                ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
+              <div class="font-semibold text-gray-800 mb-1">${faq.question}</div>
+              <div class="text-xs text-gray-600 leading-relaxed hidden sm:block">
+                ${faq.answer.substring(0, 100)}${faq.answer.length > 100 ? '...' : ''}
               </div>
             </td>
-            <td>
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm hidden lg:table-cell">
               ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
               ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
             </td>
-            <td>
-              <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
-                ✏️ Edit
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm whitespace-nowrap">
+              <button class="bg-blue-500 hover:bg-blue-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mr-1 mb-1" onclick="editFAQ(${faq.id})" title="Edit">
+                ✏️ <span class="hidden md:inline">Edit</span>
               </button>
-              <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
-                🗑️ Delete
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mb-1" onclick="deleteFAQ(${faq.id})" title="Delete">
+                🗑️ <span class="hidden md:inline">Delete</span>
               </button>
             </td>
           </tr>
@@ -858,33 +563,33 @@
           <tr>
             <td colspan="4" class="empty-state">
               <div class="empty-state-icon">🔍</div>
-              <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">No FAQs Found</p>
-              <p style="font-size: 0.9rem; color: #999;">No FAQs match "${searchTerm}"</p>
+              <p class="text-base md:text-lg font-semibold mb-2">No FAQs Found</p>
+              <p class="text-sm text-gray-500">No FAQs match "${searchTerm}"</p>
             </td>
           </tr>
         `;
       } else {
         tbody.innerHTML = filtered.map(faq => `
-          <tr>
-            <td>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
               <span class="tag">${faq.category || 'General'}</span>
             </td>
-            <td>
-              <div class="faq-question">${faq.question}</div>
-              <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">
-                ${faq.answer.substring(0, 80)}${faq.answer.length > 80 ? '...' : ''}
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
+              <div class="font-semibold text-gray-800 mb-1">${faq.question}</div>
+              <div class="text-xs text-gray-600 leading-relaxed hidden sm:block">
+                ${faq.answer.substring(0, 100)}${faq.answer.length > 100 ? '...' : ''}
               </div>
             </td>
-            <td>
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm hidden lg:table-cell">
               ${faq.keywords.slice(0, 3).map(k => `<span class="tag">${k}</span>`).join(' ')}
               ${faq.keywords.length > 3 ? `<span class="tag">+${faq.keywords.length - 3}</span>` : ''}
             </td>
-            <td>
-              <button class="btn btn-primary btn-small" onclick="editFAQ(${faq.id})" title="Edit this FAQ">
-                ✏️ Edit
+            <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm whitespace-nowrap">
+              <button class="bg-blue-500 hover:bg-blue-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mr-1 mb-1" onclick="editFAQ(${faq.id})" title="Edit">
+                ✏️ <span class="hidden md:inline">Edit</span>
               </button>
-              <button class="btn btn-danger btn-small" onclick="deleteFAQ(${faq.id})" title="Delete this FAQ">
-                🗑️ Delete
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mb-1" onclick="deleteFAQ(${faq.id})" title="Delete">
+                🗑️ <span class="hidden md:inline">Delete</span>
               </button>
             </td>
           </tr>
@@ -948,34 +653,37 @@
             <tr>
               <td colspan="5" class="empty-state">
                 <div class="empty-state-icon">🎉</div>
-                <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">All Questions Answered!</p>
-                <p style="font-size: 0.9rem; color: #999;">No low-confidence questions in the past 30 days</p>
+                <p class="text-base md:text-lg font-semibold mb-2">All Questions Answered!</p>
+                <p class="text-sm text-gray-500">No low-confidence questions in the past 30 days</p>
               </td>
             </tr>
           `;
         } else {
           tbody.innerHTML = questions.map(q => `
-            <tr>
-              <td>
-                <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">${q.question}</div>
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
+                <div class="font-semibold text-gray-800">${q.question}</div>
+                <div class="text-xs text-gray-600 sm:hidden mt-1">
+                  <span class="inline-block px-2 py-0.5 rounded text-xs ${q.score < 0.15 ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}">${(q.score * 100).toFixed(0)}%</span>
+                </div>
               </td>
-              <td>
-                <span class="tag" style="background: ${q.score < 0.15 ? '#ffebee' : '#fff3e0'}; color: ${q.score < 0.15 ? '#c62828' : '#e65100'};">
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-center hidden sm:table-cell">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${q.score < 0.15 ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}">
                   ${(q.score * 100).toFixed(0)}%
                 </span>
               </td>
-              <td style="text-align: center;">
-                <strong>${q.times_asked}</strong>
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-center font-bold text-primary">
+                ${q.times_asked}
               </td>
-              <td style="font-size: 0.85rem; color: #666;">
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs text-gray-600 hidden md:table-cell">
                 ${new Date(q.timestamp).toLocaleString()}
               </td>
-              <td>
-                <button class="btn btn-primary btn-small" onclick="createFAQFromQuestion('${q.question.replace(/'/g, "\\'")}')">
-                  ➕ Create FAQ
+              <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm whitespace-nowrap">
+                <button class="bg-green-500 hover:bg-green-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mr-1 mb-1" onclick="createFAQFromQuestion('${q.question.replace(/'/g, "\\'")}')">
+                  ➕ <span class="hidden md:inline">Create FAQ</span>
                 </button>
-                <button class="btn btn-danger btn-small" onclick="deleteUnanswered(${q.id})">
-                  🗑️ Dismiss
+                <button class="bg-red-500 hover:bg-red-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded text-xs md:text-sm font-semibold transition-colors mb-1" onclick="deleteUnanswered(${q.id})">
+                  🗑️ <span class="hidden md:inline">Dismiss</span>
                 </button>
               </td>
             </tr>

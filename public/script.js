@@ -29,7 +29,16 @@ function showAnswer(data) {
   const source = data.source || data.provider || 'local';
   const badge = $('#badge');
   badge.textContent = source;
-  badge.className = `badge badge-${source}`;
+  
+  // Tailwind CSS badge classes
+  badge.className = 'inline-block px-4 py-2 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide ';
+  if (source === 'local') {
+    badge.className += 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 border border-blue-300';
+  } else if (source === 'gemini') {
+    badge.className += 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 border border-purple-300';
+  } else if (source === 'openai') {
+    badge.className += 'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border border-green-300';
+  }
   
   const score = Math.round((data.score || data.localScore || 0) * 100);
   
@@ -41,7 +50,7 @@ function showAnswer(data) {
   if (confidenceText) confidenceText.textContent = `${score}%`;
   if (confidenceFill) confidenceFill.style.width = `${score}%`;
   if (categoryEl && data.category) {
-    categoryEl.innerHTML = `<span class="tag">${data.category}</span>`;
+    categoryEl.innerHTML = `<span class="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">${data.category}</span>`;
   } else if (categoryEl) {
     categoryEl.textContent = '';
   }
@@ -49,13 +58,15 @@ function showAnswer(data) {
   // Show contact CTA if confidence is low
   const cta = $('#contactCta');
   if (score < 40) {
-    cta.style.display = 'block';
+    cta.classList.remove('hidden');
   } else {
-    cta.style.display = 'none';
+    cta.classList.add('hidden');
   }
   
-  $('#result').style.display = 'block';
-  $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Show result with Tailwind classes
+  const result = $('#result');
+  result.classList.remove('hidden');
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 async function handleAsk() {
@@ -64,8 +75,8 @@ async function handleAsk() {
   
   $('#answerText').innerHTML = '<div class="loading"></div> Finding answer...';
   $('#badge').textContent = 'searching';
-  $('#badge').className = 'badge badge-local';
-  $('#result').style.display = 'block';
+  $('#badge').className = 'inline-block px-4 py-2 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 border border-blue-300';
+  $('#result').classList.remove('hidden');
   
   try {
     const data = await ask(q);
@@ -73,7 +84,7 @@ async function handleAsk() {
   } catch (e) {
     $('#answerText').textContent = 'Error: ' + e.message;
     $('#meta').textContent = 'Please try again or contact us directly.';
-    $('#contactCta').style.display = 'block';
+    $('#contactCta').classList.remove('hidden');
   }
 }
 
@@ -88,7 +99,7 @@ document.getElementById('question').addEventListener('keypress', (e) => {
 
 document.getElementById('clear').addEventListener('click', () => {
   $('#question').value = '';
-  $('#result').style.display = 'none';
+  $('#result').classList.add('hidden');
 });
 
 // Quick action buttons

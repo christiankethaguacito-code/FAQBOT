@@ -10,9 +10,6 @@
     <meta name="description" content="AI-Powered FAQ Assistant for Sultan Kudarat State University Student Body Organization">
     <meta name="keywords" content="SKSU, FAQ, Student, Assistant, University">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png">
@@ -796,10 +793,7 @@
             await loadCategories();
             await loadVoiceSettings();
             displayCategorySuggestions();
-            registerServiceWorker();
             setupOfflineDetection();
-            setupPWAInstall();
-            setupPWAFeatures();
             handleURLParameters();
         });
 
@@ -1356,337 +1350,23 @@
             });
         }
 
-        // ==================== OFFLINE SUPPORT & PWA ====================
-
-        // Register Service Worker with enhanced features
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then((registration) => {
-                        console.log('✅ ServiceWorker registered:', registration.scope);
-                        
-                        // Check for updates every hour
-                        setInterval(() => {
-                            registration.update();
-                        }, 60 * 60 * 1000);
-                        
-                        // Handle updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showUpdateNotification(registration);
-                                }
-                            });
-                        });
-                        
-                        // Request cache status
-                        getCacheStatus();
-                        
-                        // Prefetch FAQs for offline use
-                        prefetchFAQs();
-                    })
-                    .catch((error) => {
-                        console.error('❌ ServiceWorker registration failed:', error);
-                    });
-                
-                // Listen for messages from service worker
-                navigator.serviceWorker.addEventListener('message', (event) => {
-                    console.log('📨 Message from SW:', event.data);
-                    
-                    if (event.data.action === 'cacheCleared') {
-                        console.log('🗑️ Cache cleared successfully');
-                    }
-                    
-                    if (event.data.action === 'cacheStatus') {
-                        console.log('📊 Cache status:', event.data.status);
-                        displayCacheInfo(event.data.status);
-                    }
-                });
-            }
-        }
-        
-        // Get cache status from service worker
-        function getCacheStatus() {
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ action: 'getCacheStatus' });
-            }
-        }
-        
-        // Prefetch FAQs for offline use
-        function prefetchFAQs() {
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ action: 'prefetchFAQs' });
-                console.log('📥 Prefetching FAQs for offline use...');
-            }
-        }
-        
-        // Display cache info (for debugging)
-        function displayCacheInfo(status) {
-            console.log(`
-📦 PWA Cache Info:
-   Version: ${status.version}
-   App Shell: ${status.appShellSize} files
-   Data: ${status.dataSize} items
-   Images: ${status.imageSize} items
-   Total: ${status.totalSize} cached items
-            `);
-        }
-        
-        // Clear all caches
-        function clearAllCaches() {
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ action: 'clearCache' });
-                console.log('🗑️ Clearing all caches...');
-            }
-        }
+        // ==================== OFFLINE DETECTION ====================
 
         // Setup Offline Detection
         function setupOfflineDetection() {
             window.addEventListener('online', () => {
                 isOnline = true;
                 console.log('✅ Back online');
-                hideOfflineMessage();
-                showOnlineNotification();
-                // Reload categories when back online
                 loadCategories();
             });
 
             window.addEventListener('offline', () => {
                 isOnline = false;
                 console.log('⚠️ Offline mode');
-                showOfflineMessage();
-            });
-
-            // Check initial status
-            if (!navigator.onLine) {
-                showOfflineMessage();
-            }
-        }
-
-        // Setup PWA Install Prompt
-        function setupPWAInstall() {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                showInstallButton();
-            });
-
-            window.addEventListener('appinstalled', () => {
-                console.log('✅ PWA installed successfully');
-                deferredPrompt = null;
-                hideInstallButton();
             });
         }
 
-        // Show Install Button
-        function showInstallButton() {
-            const container = document.querySelector('.glass-container');
-            const installBanner = document.createElement('div');
-            installBanner.id = 'installBanner';
-            installBanner.style.cssText = `
-                position: absolute;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                color: white;
-                padding: 12px 24px;
-                border-radius: 12px;
-                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                z-index: 1000;
-                animation: slideUp 0.4s ease;
-            `;
-            
-            installBanner.innerHTML = `
-                <span style="font-size: 14px; font-weight: 500;">📲 Install app for offline access</span>
-                <button onclick="installPWA()" style="background: white; color: #059669; padding: 6px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-                    Install
-                </button>
-                <button onclick="hideInstallButton()" style="background: transparent; color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer;">
-                    Later
-                </button>
-            `;
-            
-            container.appendChild(installBanner);
-        }
-
-        // Install PWA
-        async function installPWA() {
-            if (!deferredPrompt) return;
-
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('✅ User accepted PWA install');
-            } else {
-                console.log('❌ User dismissed PWA install');
-            }
-            
-            deferredPrompt = null;
-            hideInstallButton();
-        }
-
-        // Hide Install Button
-        function hideInstallButton() {
-            const banner = document.getElementById('installBanner');
-            if (banner) {
-                banner.style.animation = 'slideDown 0.4s ease';
-                setTimeout(() => banner.remove(), 400);
-            }
-        }
-
-        // Show Offline Message
-        function showOfflineMessage() {
-            const existing = document.getElementById('offlineIndicator');
-            if (existing) return;
-
-            const indicator = document.createElement('div');
-            indicator.id = 'offlineIndicator';
-            indicator.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #ef4444;
-                color: white;
-                padding: 10px 20px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-                animation: slideDown 0.4s ease;
-            `;
-            indicator.innerHTML = '📡 You\'re offline - Using cached data';
-            document.body.appendChild(indicator);
-        }
-
-        // Hide Offline Message
-        function hideOfflineMessage() {
-            const indicator = document.getElementById('offlineIndicator');
-            if (indicator) {
-                indicator.style.animation = 'slideUp 0.4s ease reverse';
-                setTimeout(() => indicator.remove(), 400);
-            }
-        }
-
-        // Show Online Notification
-        function showOnlineNotification() {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #10b981;
-                color: white;
-                padding: 10px 20px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-                animation: slideDown 0.4s ease;
-            `;
-            notification.innerHTML = '✅ Back online!';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideUp 0.4s ease reverse';
-                setTimeout(() => notification.remove(), 400);
-            }, 3000);
-        }
-
-        // Show Update Notification
-        function showUpdateNotification(registration) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 12px 24px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-                animation: slideDown 0.4s ease;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            `;
-            notification.innerHTML = `
-                <span>🔄 Update available!</span>
-                <button onclick="updateApp()" style="background: white; color: #667eea; padding: 6px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 13px;">
-                    Update Now
-                </button>
-                <button onclick="this.parentElement.remove()" style="background: transparent; color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 13px;">
-                    Later
-                </button>
-            `;
-            document.body.appendChild(notification);
-            
-            // Store registration for update
-            window.pendingServiceWorkerUpdate = registration;
-        }
-        
-        // Update App
-        function updateApp() {
-            if (window.pendingServiceWorkerUpdate && window.pendingServiceWorkerUpdate.waiting) {
-                window.pendingServiceWorkerUpdate.waiting.postMessage({ action: 'skipWaiting' });
-                window.location.reload();
-            }
-        };
-                background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-                color: white;
-                padding: 12px 24px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 1000;
-                box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            `;
-            notification.innerHTML = `
-                <span>🎉 New version available!</span>
-                <button onclick="window.location.reload()" style="background: white; color: #7c3aed; padding: 6px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-                    Update
-                </button>
-            `;
-            document.body.appendChild(notification);
-        }
-        
-        // ==================== ENHANCED PWA FEATURES ====================
-        
-        // Setup additional PWA features
-        function setupPWAFeatures() {
-            // Setup share functionality
-            setupShareFeature();
-            
-            // Setup badge API
-            setupBadgeAPI();
-            
-            // Setup screen wake lock
-            setupWakeLock();
-            
-            // Setup file handler
-            setupFileHandler();
-            
-            // Check if running as PWA
-            checkPWAMode();
-        }
-        
-        // Handle URL parameters (from shortcuts)
+        // Handle URL Parameters
         function handleURLParameters() {
             const params = new URLSearchParams(window.location.search);
             const action = params.get('action');
@@ -1696,8 +1376,6 @@
                 document.getElementById('userInput').focus();
             } else if (action === 'browse') {
                 displayCategorySuggestions();
-            } else if (action === 'voice') {
-                startListening();
             }
             
             if (query) {
@@ -1705,129 +1383,6 @@
                 sendMessage();
             }
         }
-        
-        // Setup Share Feature
-        function setupShareFeature() {
-            window.shareAnswer = async (questionText, answerText) => {
-                if (navigator.share) {
-                    try {
-                        await navigator.share({
-                            title: 'SKSU FAQ Answer',
-                            text: `Q: ${questionText}\n\nA: ${answerText}`,
-                            url: window.location.href
-                        });
-                        console.log('✅ Shared successfully');
-                    } catch (error) {
-                        if (error.name !== 'AbortError') {
-                            console.error('❌ Share failed:', error);
-                        }
-                    }
-                } else {
-                    // Fallback: Copy to clipboard
-                    const text = `Q: ${questionText}\n\nA: ${answerText}`;
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert('📋 Copied to clipboard!');
-                    });
-                }
-            };
-        }
-        
-        // Setup Badge API
-        function setupBadgeAPI() {
-            window.updateBadge = (count) => {
-                if ('setAppBadge' in navigator) {
-                    if (count > 0) {
-                        navigator.setAppBadge(count);
-                    } else {
-                        navigator.clearAppBadge();
-                    }
-                }
-            };
-            
-            // Clear badge when app is opened
-            if ('clearAppBadge' in navigator) {
-                navigator.clearAppBadge();
-            }
-        }
-        
-        // Setup Screen Wake Lock
-        function setupWakeLock() {
-            let wakeLock = null;
-            
-            window.requestWakeLock = async () => {
-                if ('wakeLock' in navigator) {
-                    try {
-                        wakeLock = await navigator.wakeLock.request('screen');
-                        console.log('✅ Wake lock active');
-                        
-                        wakeLock.addEventListener('release', () => {
-                            console.log('Wake lock released');
-                        });
-                    } catch (error) {
-                        console.error('❌ Wake lock failed:', error);
-                    }
-                }
-            };
-            
-            window.releaseWakeLock = () => {
-                if (wakeLock) {
-                    wakeLock.release();
-                    wakeLock = null;
-                }
-            };
-        }
-        
-        // Setup File Handler
-        function setupFileHandler() {
-            if ('launchQueue' in window) {
-                window.launchQueue.setConsumer((launchParams) => {
-                    if (launchParams.files && launchParams.files.length > 0) {
-                        launchParams.files[0].getFile().then((file) => {
-                            file.text().then((content) => {
-                                document.getElementById('userInput').value = content;
-                                console.log('📄 File loaded:', file.name);
-                            });
-                        });
-                    }
-                });
-            }
-        }
-        
-        // Check if running as PWA
-        function checkPWAMode() {
-            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                          window.navigator.standalone || 
-                          document.referrer.includes('android-app://');
-            
-            if (isPWA) {
-                console.log('🚀 Running as PWA');
-                document.body.classList.add('pwa-mode');
-                
-                // Hide install button if already installed
-                hideInstallButton();
-            } else {
-                console.log('🌐 Running in browser');
-            }
-            
-            return isPWA;
-        }
-        
-        // Get PWA installation status
-        function getPWAStatus() {
-            return {
-                isInstalled: checkPWAMode(),
-                isOnline: navigator.onLine,
-                hasServiceWorker: 'serviceWorker' in navigator && navigator.serviceWorker.controller,
-                supportsShare: 'share' in navigator,
-                supportsBadge: 'setAppBadge' in navigator,
-                supportsWakeLock: 'wakeLock' in navigator,
-                supportsNotifications: 'Notification' in window,
-                supportsPush: 'PushManager' in window
-            };
-        }
-        
-        // Log PWA capabilities
-        console.log('📱 PWA Capabilities:', getPWAStatus());
 
         // Add animations
         const style = document.createElement('style');

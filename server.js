@@ -76,6 +76,11 @@ Guidelines:
 app.use(express.json());
 app.use(express.static('public'));
 
+// Admin panel route
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
+});
+
 // ==================== API ENDPOINTS ====================
 
 // Get all categories

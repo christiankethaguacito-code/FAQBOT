@@ -1274,9 +1274,16 @@
 
         function scrollToBottom() {
             const area = document.getElementById('messagesArea');
-            setTimeout(() => {
-                area.scrollTop = area.scrollHeight;
-            }, 100);
+            if (!area) return;
+            
+            // Only auto-scroll if user is already near the bottom (within 100px)
+            const isNearBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 100;
+            
+            if (isNearBottom) {
+                setTimeout(() => {
+                    area.scrollTop = area.scrollHeight;
+                }, 100);
+            }
         }
 
         function escapeHtml(text) {

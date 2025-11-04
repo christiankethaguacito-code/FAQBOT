@@ -1,339 +1,490 @@
 import dotenv from 'dotenv';
-// Load environment variables FIRST (before any other imports that need them)
 dotenv.config();
 
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import crypto from 'crypto';
-import { faqOps, analyticsOps, chatOps } from './db.js';
-import groqAI from './services/groq-ai.js';
+import { categoryOps, questionOps, searchOps, voiceSettingsOps, feedbackOps, analyticsOps } from './db.js';
+import Groq from 'groq-sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// AI feature flags (can be toggled via environment variables)
-const AI_ENABLED = process.env.AI_ENABLED !== 'false';
-const AI_CONVERSATIONAL = process.env.AI_CONVERSATIONAL !== 'false';
-const AI_ENHANCED_MATCHING = process.env.AI_ENHANCED_MATCHING !== 'false';
+// Initialize Multiple Groq API clients for failover
+const apiKeys = [
+  process.env.GROQ_API_KEY_1,
+  process.env.GROQ_API_KEY_2
+].filter(key => key && key !== 'your_second_api_key_here'); // Filter out placeholder
+
+const groqClients = apiKeys.map(key => new Groq({ apiKey: key }));
+
+// Track current API key index and rate limit status
+let currentKeyIndex = 0;
+let keyRateLimitStatus = apiKeys.map(() => ({ limited: false, resetTime: null }));
+
+console.log(`🔑 Initialized ${groqClients.length} Groq API key(s) for failover`);
+
+// Function to get next available API client
+function getAvailableGroqClient() {
+  // Check if current key is available
+  if (!keyRateLimitStatus[currentKeyIndex].limited) {
+    return { client: groqClients[currentKeyIndex], keyIndex: currentKeyIndex };
+  }
+  
+  // Find next available key
+  for (let i = 0; i < groqClients.length; i++) {
+    const nextIndex = (currentKeyIndex + i + 1) % groqClients.length;
+    if (!keyRateLimitStatus[nextIndex].limited) {
+      currentKeyIndex = nextIndex;
+      console.log(`🔄 Switched to API key #${currentKeyIndex + 1}`);
+      return { client: groqClients[nextIndex], keyIndex: nextIndex };
+    }
+  }
+  
+  return null; // All keys are rate limited
+}
+
+// Mark a key as rate limited
+function markKeyAsLimited(keyIndex) {
+  keyRateLimitStatus[keyIndex].limited = true;
+  keyRateLimitStatus[keyIndex].resetTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+  console.log(`⚠️ API key #${keyIndex + 1} marked as rate limited`);
+}
+
+const SKSU_CONTEXT = `You are an AI assistant for Sultan Kudarat State University (SKSU) Student Body Organization.
+
+SKSU Information:
+- Vision: "A premier state university in Southeast Asia"
+- Mission: Providing quality education, research, and community service
+- Location: Tacurong City, Sultan Kudarat, Philippines
+- Founded: 1983
+
+You help students with:
+- Academic policies and procedures
+- Student services and welfare
+- University rules and regulations
+- Campus life and activities
+- General inquiries about SKSU
+
+Guidelines:
+- Be helpful, friendly, and professional
+- Provide accurate information about SKSU
+- If you don't know something, admit it and suggest contacting the appropriate office
+- Keep responses concise and clear
+- Use a conversational but respectful tone`;
 
 app.use(express.json());
 app.use(express.static('public'));
 
-// Serve admin panel
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
-});
+// ==================== API ENDPOINTS ====================
 
-app.use('/admin', express.static('admin'));
-
-function tokenize(text) {
-  return text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(Boolean);
-}
-
-function score(question, faq) {
-  const qTokens = new Set(tokenize(question));
-  const keywords = faq.keywords ? JSON.parse(faq.keywords) : [];
-  const allText = `${faq.question} ${faq.answer} ${keywords.join(' ')} ${faq.category || ''}`;
-  const fTokens = tokenize(allText);
-  
-  let matches = 0;
-  for (const token of fTokens) {
-    if (qTokens.has(token)) matches++;
-  }
-  
-  const keywordBonus = keywords.some(kw => question.toLowerCase().includes(kw.toLowerCase())) ? 0.2 : 0;
-  return (matches / (qTokens.size + fTokens.length - matches)) + keywordBonus;
-}
-
-// Middleware to handle session
-app.use((req, res, next) => {
-  if (!req.headers['x-session-id']) {
-    req.sessionId = crypto.randomUUID();
-    res.setHeader('X-Session-ID', req.sessionId);
-  } else {
-    req.sessionId = req.headers['x-session-id'];
-  }
-  next();
-});
-
-app.get('/api/faqs', (req, res) => {
+// Get all categories
+app.get('/api/categories', (req, res) => {
   try {
-    const faqs = faqOps.getAll().map(faq => ({
-      ...faq,
-      keywords: JSON.parse(faq.keywords || '[]')
-    }));
-    res.json(faqs);
+    const categories = categoryOps.getAll();
+    res.json({ categories });
   } catch (err) {
-    console.error('Error in /api/faqs:', err);
+    console.error('Error in /api/categories:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/ask', async (req, res) => {
+// Get questions for a specific category
+app.get('/api/categories/:id/questions', (req, res) => {
   try {
-    const question = req.body?.question?.trim();
-    const userId = req.body?.userId || null;
-    const useAI = req.body?.useAI !== false; // Client can disable AI per request
+    const categoryId = parseInt(req.params.id);
+    const category = categoryOps.getById(categoryId);
     
-    if (!question) return res.status(400).json({ error: 'Question required' });
-    
-    const faqs = faqOps.getAll();
-    let best = { score: 0, answer: null, faq: null };
-    let aiMatch = null;
-    let questionType = null;
-    
-    // Step 1: Classify the question (organization-related or general knowledge)
-    if (AI_ENABLED && useAI) {
-      try {
-        questionType = await groqAI.classifyQuestion(question);
-        console.log(`Question type: ${questionType.isOrganizationRelated ? 'Organization' : 'General Knowledge'} (${(questionType.confidence * 100).toFixed(0)}%)`);
-      } catch (error) {
-        console.error('Question classification failed:', error.message);
-      }
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
     }
     
-    // Try AI-enhanced matching first if enabled
-    if (AI_ENABLED && AI_ENHANCED_MATCHING && useAI) {
-      try {
-        aiMatch = await groqAI.enhancedFAQMatch(question, faqs);
-        if (aiMatch && aiMatch.confidence > best.score) {
-          best = {
-            score: aiMatch.confidence,
-            answer: aiMatch.faq.answer,
-            faq: aiMatch.faq,
-            source: 'ai-enhanced',
-            reasoning: aiMatch.reasoning
-          };
-        }
-      } catch (aiError) {
-        console.error('AI matching failed, falling back to local:', aiError.message);
-      }
-    }
-    
-    // Fallback to local matching if AI didn't find a good match
-    if (best.score < 0.3) {
-      for (const faq of faqs) {
-        const s = score(question, faq);
-        if (s > best.score) {
-          best = { score: s, answer: faq.answer, faq };
-        }
-      }
-    }
-    
-    let finalAnswer = null;
-    let source = best.source || 'local';
-    
-    // Step 2: Decide how to answer based on question type and match quality
-    if (best.faq && best.score >= 0.3) {
-      // We have a good FAQ match - use conversational response
-      finalAnswer = best.answer;
-      
-      if (AI_ENABLED && AI_CONVERSATIONAL && useAI) {
-        try {
-          const conversationalAnswer = await groqAI.generateConversationalResponse(
-            question,
-            faqs,
-            best.answer,
-            best.score
-          );
-          if (conversationalAnswer && conversationalAnswer !== best.answer) {
-            finalAnswer = conversationalAnswer;
-            source = 'ai-conversational';
-          }
-        } catch (aiError) {
-          console.error('AI conversation failed, using original answer:', aiError.message);
-        }
-      }
-    } else if (questionType && !questionType.isOrganizationRelated && AI_ENABLED && useAI) {
-      // General knowledge question (math, English, etc.) - let AI answer directly
-      try {
-        finalAnswer = await groqAI.answerGeneralQuestion(question);
-        source = 'ai-general-knowledge';
-      } catch (aiError) {
-        console.error('AI general answer failed:', aiError.message);
-        finalAnswer = "I'm having trouble answering that right now. Please try again.";
-        source = 'error';
-      }
-    } else {
-      // Organization-related but no good FAQ match - suggest contacting SBO
-      finalAnswer = "I'm not sure about that specific question regarding SKSU SBO. Please email us at sksustudentbodyorganizationisu@gmail.com or visit sboweb.vercel.app for more information.";
-      source = 'fallback';
-    }
-    
-    // Get related FAQs for smart suggestions (only for organization questions)
-    let relatedFAQs = [];
-    if (AI_ENABLED && useAI && (best.faq || (questionType && questionType.isOrganizationRelated))) {
-      try {
-        relatedFAQs = await groqAI.findRelatedFAQs(question, faqs.filter(f => f.id !== best.faq?.id));
-      } catch (aiError) {
-        console.error('AI related FAQs failed:', aiError.message);
-      }
-    }
-    
-    // Log analytics
-    analyticsOps.logQuery(question, best.faq?.id || null, best.score, req.sessionId);
-    
-    // Save to chat history
-    chatOps.saveMessage(req.sessionId, userId, question, finalAnswer, best.score);
-    
-    res.json({
-      answer: finalAnswer,
-      source,
-      score: best.score,
-      category: best.faq?.category,
-      sessionId: req.sessionId,
-      relatedFAQs: relatedFAQs.slice(0, 3).map(f => ({
-        question: f.question,
-        category: f.category
-      })),
-      aiEnabled: AI_ENABLED,
-      reasoning: best.reasoning
+    const questions = questionOps.getByCategoryId(categoryId);
+    res.json({ 
+      category,
+      questions 
     });
   } catch (err) {
-    console.error('Error in /api/ask:', err);
+    console.error('Error in /api/categories/:id/questions:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Admin API endpoints
-app.get('/api/admin/faqs', (req, res) => {
+// Get specific question answer
+app.get('/api/questions/:id', (req, res) => {
   try {
-    const faqs = faqOps.getAll().map(faq => ({
-      ...faq,
-      keywords: JSON.parse(faq.keywords || '[]')
-    }));
-    res.json(faqs);
+    const questionId = parseInt(req.params.id);
+    const question = questionOps.getById(questionId);
+    
+    if (!question) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+    
+    res.json(question);
   } catch (err) {
-    console.error('Error in /api/admin/faqs:', err);
+    console.error('Error in /api/questions/:id:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/admin/faqs', (req, res) => {
+// Search questions
+app.post('/api/search', (req, res) => {
   try {
-    const { category, question, answer, keywords } = req.body;
-    const result = faqOps.create(category, question, answer, keywords || []);
+    const { query } = req.body;
+    
+    if (!query || query.trim().length === 0) {
+      return res.json({ results: [] });
+    }
+    
+    const results = searchOps.search(query.trim());
+    res.json({ results });
+  } catch (err) {
+    console.error('Error in /api/search:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// AI Chat endpoint with automatic failover
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { message, conversationHistory = [] } = req.body;
+    
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Get available API client
+    const availableClient = getAvailableGroqClient();
+    
+    if (!availableClient) {
+      return res.status(429).json({ 
+        error: 'All AI API keys have reached their rate limit. Please try again later or use FAQ mode.',
+        allKeysLimited: true
+      });
+    }
+
+    const { client: groq, keyIndex } = availableClient;
+
+    // Build messages array for Groq
+    const messages = [
+      {
+        role: 'system',
+        content: SKSU_CONTEXT
+      },
+      ...conversationHistory.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      {
+        role: 'user',
+        content: message
+      }
+    ];
+
+    // Call Groq API with current key
+    const completion = await groq.chat.completions.create({
+      messages: messages,
+      model: 'llama-3.1-8b-instant', // Updated to current available model
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 0.9,
+      stream: false
+    });
+
+    const aiResponse = completion.choices[0]?.message?.content || 
+      'I apologize, but I could not generate a response. Please try again.';
+
+    res.json({ 
+      success: true,
+      response: aiResponse,
+      model: 'llama-3.1-8b-instant',
+      apiKeyUsed: keyIndex + 1 // Show which key was used (for debugging)
+    });
+
+  } catch (err) {
+    console.error('❌ AI Chat Error:', err.message);
+    
+    if (err.status === 429) {
+      // Mark current key as rate limited
+      markKeyAsLimited(currentKeyIndex);
+      
+      // Try with next available key
+      const nextClient = getAvailableGroqClient();
+      
+      if (nextClient) {
+        return res.status(200).json({ 
+          success: false,
+          retry: true,
+          message: 'Switching to backup API key. Please retry your request.',
+          switchedToKey: nextClient.keyIndex + 1
+        });
+      } else {
+        return res.status(429).json({ 
+          error: 'All AI API keys have reached their rate limit. Please try again in 24 hours or use FAQ mode.',
+          allKeysLimited: true
+        });
+      }
+    }
+    
+    if (err.status === 401) {
+      return res.status(401).json({ 
+        error: 'AI service configuration error. Please contact the administrator.' 
+      });
+    }
+    
+    res.status(500).json({ error: 'An error occurred while processing your request.' });
+  }
+});
+
+// ==================== ADMIN ENDPOINTS ====================
+
+// Get all questions with category info (for admin)
+app.get('/api/admin/questions', (req, res) => {
+  try {
+    const questions = questionOps.getAllWithCategory();
+    res.json({ questions });
+  } catch (err) {
+    console.error('Error in /api/admin/questions:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add category
+app.post('/api/admin/categories', (req, res) => {
+  try {
+    const { name, icon, description, displayOrder } = req.body;
+    const result = categoryOps.add(name, icon || '', description || '', displayOrder || 0);
     res.json({ success: true, id: result.lastInsertRowid });
   } catch (err) {
-    console.error('Error creating FAQ:', err);
+    console.error('Error adding category:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/admin/faqs/:id', (req, res) => {
+// Add question
+app.post('/api/admin/questions', (req, res) => {
   try {
-    const { category, question, answer, keywords } = req.body;
-    faqOps.update(req.params.id, category, question, answer, keywords || []);
+    const { categoryId, question, answer, displayOrder, imageUrl } = req.body;
+    const result = questionOps.add(categoryId, question, answer, displayOrder || 0, imageUrl || '');
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    console.error('Error adding question:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update category
+app.put('/api/admin/categories/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, icon, description, displayOrder } = req.body;
+    categoryOps.update(id, name, icon, description, displayOrder);
     res.json({ success: true });
   } catch (err) {
-    console.error('Error updating FAQ:', err);
+    console.error('Error updating category:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/admin/faqs/:id', (req, res) => {
+// Update question
+app.put('/api/admin/questions/:id', (req, res) => {
   try {
-    faqOps.delete(req.params.id);
+    const id = parseInt(req.params.id);
+    const { question, answer, displayOrder, imageUrl } = req.body;
+    questionOps.update(id, question, answer, displayOrder, imageUrl || '');
     res.json({ success: true });
   } catch (err) {
-    console.error('Error deleting FAQ:', err);
+    console.error('Error updating question:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// AI-powered admin endpoints
-app.post('/api/admin/ai/generate-answer', async (req, res) => {
+// Delete category
+app.delete('/api/admin/categories/:id', (req, res) => {
   try {
-    if (!AI_ENABLED) {
-      return res.status(503).json({ error: 'AI features are disabled' });
+    const id = parseInt(req.params.id);
+    categoryOps.delete(id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting category:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete question
+app.delete('/api/admin/questions/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    questionOps.delete(id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting question:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== VOICE SETTINGS ENDPOINTS ====================
+
+// Get voice settings
+app.get('/api/voice-settings', (req, res) => {
+  try {
+    const settings = voiceSettingsOps.get();
+    console.log('📥 GET /api/voice-settings - Returning:', settings);
+    res.json({ settings });
+  } catch (err) {
+    console.error('❌ Error getting voice settings:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update voice settings (admin only)
+app.put('/api/admin/voice-settings', (req, res) => {
+  try {
+    const { voiceName, voiceLang, voiceRate, voicePitch, voiceVolume } = req.body;
+    console.log('💾 PUT /api/admin/voice-settings - Received:', req.body);
+    
+    voiceSettingsOps.update(
+      voiceName || '',
+      voiceLang || 'en-US',
+      parseFloat(voiceRate) || 1.0,
+      parseFloat(voicePitch) || 1.0,
+      parseFloat(voiceVolume) || 1.0
+    );
+    
+    // Verify the update
+    const updatedSettings = voiceSettingsOps.get();
+    console.log('✅ Voice settings updated:', updatedSettings);
+    
+    res.json({ success: true, settings: updatedSettings });
+  } catch (err) {
+    console.error('❌ Error updating voice settings:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== FEEDBACK ENDPOINTS ====================
+
+// Submit feedback
+app.post('/api/feedback', (req, res) => {
+  try {
+    const { questionId, messageType, messageText, feedbackType, comment, userSession } = req.body;
+    
+    if (!messageType || !messageText || !feedbackType) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    const { question, category } = req.body;
-    if (!question) {
-      return res.status(400).json({ error: 'Question required' });
+    if (!['helpful', 'not_helpful'].includes(feedbackType)) {
+      return res.status(400).json({ error: 'Invalid feedback type' });
     }
     
-    const answer = await groqAI.generateFAQAnswer(question, category);
-    res.json({ answer, source: 'ai-generated' });
+    const result = feedbackOps.add(
+      questionId || null,
+      messageType,
+      messageText,
+      feedbackType,
+      comment || '',
+      userSession || ''
+    );
+    
+    console.log(`📊 Feedback received: ${feedbackType} for ${messageType} message`);
+    res.json({ success: true, id: result.lastInsertRowid });
   } catch (err) {
-    console.error('Error generating answer:', err);
+    console.error('Error submitting feedback:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/admin/ai/generate-keywords', async (req, res) => {
+// Get all feedback (admin only)
+app.get('/api/admin/feedback', (req, res) => {
   try {
-    if (!AI_ENABLED) {
-      return res.status(503).json({ error: 'AI features are disabled' });
+    const limit = parseInt(req.query.limit) || 100;
+    const feedback = feedbackOps.getAll(limit);
+    res.json({ feedback });
+  } catch (err) {
+    console.error('Error getting feedback:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get feedback statistics (admin only)
+app.get('/api/admin/feedback/stats', (req, res) => {
+  try {
+    const stats = feedbackOps.getStats();
+    res.json(stats);
+  } catch (err) {
+    console.error('Error getting feedback stats:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get feedback for specific question (admin only)
+app.get('/api/admin/questions/:id/feedback', (req, res) => {
+  try {
+    const questionId = parseInt(req.params.id);
+    const feedback = feedbackOps.getByQuestion(questionId);
+    res.json({ feedback });
+  } catch (err) {
+    console.error('Error getting question feedback:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== ANALYTICS ENDPOINTS ====================
+
+// Track analytics event
+app.post('/api/analytics/track', (req, res) => {
+  try {
+    const { eventType, eventData, questionId, categoryId, searchTerm, mode, userSession } = req.body;
+    
+    if (!eventType) {
+      return res.status(400).json({ error: 'Event type is required' });
     }
     
-    const { question, answer } = req.body;
-    if (!question || !answer) {
-      return res.status(400).json({ error: 'Question and answer required' });
-    }
+    const result = analyticsOps.track(
+      eventType,
+      eventData || {},
+      questionId || null,
+      categoryId || null,
+      searchTerm || '',
+      mode || 'faq',
+      userSession || ''
+    );
     
-    const keywords = await groqAI.generateKeywords(question, answer);
-    res.json({ keywords, source: 'ai-generated' });
+    res.json({ success: true, id: result.lastInsertRowid });
   } catch (err) {
-    console.error('Error generating keywords:', err);
+    console.error('Error tracking analytics:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/admin/ai/status', (req, res) => {
-  res.json({
-    enabled: AI_ENABLED,
-    conversational: AI_CONVERSATIONAL,
-    enhancedMatching: AI_ENHANCED_MATCHING,
-    provider: 'Groq',
-    model: 'llama-3.1-70b-versatile'
-  });
-});
-
-// Analytics endpoints
-app.get('/api/admin/analytics', (req, res) => {
+// Get analytics dashboard (admin only)
+app.get('/api/admin/analytics/dashboard', (req, res) => {
   try {
-    res.json({
-      stats: analyticsOps.getStats(),
-      topQuestions: analyticsOps.getTopQuestions(20),
-      faqUsage: analyticsOps.getFAQUsage()
-    });
+    const days = parseInt(req.query.days) || 30;
+    const dashboard = analyticsOps.getDashboard(days);
+    res.json(dashboard);
   } catch (err) {
-    console.error('Error in analytics:', err);
+    console.error('Error getting analytics dashboard:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Chat history endpoints
-app.get('/api/chat/history/:sessionId', (req, res) => {
+// Get failed searches (admin only)
+app.get('/api/admin/analytics/failed-searches', (req, res) => {
   try {
-    const history = chatOps.getHistory(req.params.sessionId);
-    res.json(history);
+    const limit = parseInt(req.query.limit) || 20;
+    const failedSearches = analyticsOps.getFailedSearches(limit);
+    res.json({ failedSearches });
   } catch (err) {
-    console.error('Error in chat history:', err);
+    console.error('Error getting failed searches:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// ==================== SERVER ====================
 
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`✅ Student FAQ Bot running at http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`✅ FAQ Bot Server running at http://localhost:${PORT}`);
   console.log(`📖 Open your browser and visit the URL above`);
-});
-
-server.on('error', (err) => {
-  console.error('Server error:', err);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use`);
-  }
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled rejection:', err);
 });

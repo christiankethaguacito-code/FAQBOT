@@ -1,176 +1,216 @@
-# FAQ BotExample (PowerShell):
+# 🎓 SKSU SBO FAQ Bot - Conversational Chat System
 
+A modern, conversational chat interface for Sultan Kudarat State University Student Body Organization with full admin panel.
 
+## ✨ Features
 
-Small sample FAQ bot using Node.js + Express with a simple local matching algorithm and optional LLM fallbacks.
+- **� Chat Interface** - WhatsApp/Messenger-style conversational UI
+- **🤖 Smart Assistant** - Interactive bot that guides users through topics
+- **📂 Category Navigation** - Organized by topics with emoji icons
+- **🔍 Smart Search** - Find answers by typing naturally
+- **🎨 Beautiful UI** - Modern, responsive design with smooth animations
+- **⚡ Fast Responses** - Instant answers from SQLite database
+- **� Admin Panel** - Full CRUD interface to manage categories and questions
+- **📱 Mobile Friendly** - Works perfectly on all devices
 
-Gemini Premium (Vertex AI) automation
+## 🚀 Quick Start
 
-Features------------------------------------
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-- Serve a minimal client at `/` to ask questions
+2. **Start Server**:
+   ```bash
+   npm start
+   ```
 
-- `/api/faqs` returns the FAQ datasetThe `/webhook` endpoint logs incoming questions, adds FAQ context, and can call Gemini Premium via Vertex AI when the local match confidence is low.
+3. **Access the App**:
+   - **Chat Interface**: http://localhost:3000
+   - **Admin Panel**: http://localhost:3000/admin.html
 
-- `/api/ask` accepts `{ question }` and returns the best local match (or uses OpenAI/Gemini when configured)
+## 🔐 Admin Panel
 
-- `/webhook` logs inbound questions and can call Gemini Premium via Vertex AI before respondingEnvironment variables
+**URL:** http://localhost:3000/admin.html
 
-- `GCP_PROJECT` (or `GOOGLE_CLOUD_PROJECT` / `GOOGLE_PROJECT_ID`) — Google Cloud project that has access to Gemini
+**Default Credentials:**
+- Username: `admin`
+- Password: `admin123`
 
-Requirements- `GCP_LOCATION` (or `GOOGLE_LOCATION`) — Vertex AI region, e.g., `us-central1`
+### Admin Features:
+- ✅ **Dashboard** - View statistics (categories, questions, last updated)
+- ✅ **Category Management** - Add, edit, delete categories
+- ✅ **Question Management** - Add, edit, delete questions
+- ✅ **Search & Filter** - Filter questions by category
+- ✅ **Live Preview** - See changes immediately on main site
 
-- Node 18+ (uses top-level await and the global `fetch` API)- `GEMINI_MODEL` (or `GOOGLE_MODEL`) — Gemini model id, e.g., `gemini-1.5-flash`
+**Full Admin Guide:** See [ADMIN-PANEL-GUIDE.md](ADMIN-PANEL-GUIDE.md)
 
-- `GOOGLE_APPLICATION_CREDENTIALS` — path to a service account JSON key (for local dev), or rely on Application Default Credentials when deployed to GCP
+## 📝 How to Add Your Own Data
 
-Quick start
+### Method 1: Using the Admin Panel (Recommended)
 
-Webhook endpoint (POST)
+1. Open http://localhost:3000/admin.html
+2. Login with credentials
+3. Use the Categories and Questions tabs to add content
+4. Changes appear immediately on the main site
 
-1. Install dependencies- `POST /webhook` with JSON body:
+### Method 2: Using Import Script
 
-	- `question` (string) — required
+1. Open `add-my-data.js`
+2. Add your categories and questions in the `yourData` array
+3. Run: `node add-my-data.js`
 
-```powershell	- `source` (string) — optional source identifier
-
-npm install	- `userId` (string) — optional user id
-
+Example:
+```javascript
+const yourData = [
+  {
+    category: {
+      name: 'Scholarships',
+      icon: '💰',
+      description: 'Financial aid and scholarships',
+      displayOrder: 4
+    },
+    questions: [
+      {
+        question: 'What scholarships are available?',
+        answer: 'SKSU offers various scholarships including academic excellence, sports, and need-based scholarships.',
+        displayOrder: 1
+      }
+    ]
+  }
+];
 ```
 
-Response:
+### Method 2: Using API Endpoints
 
-2. Start the server- 200 JSON: `{ answer, provider, localScore }`
-
-
-
-```powershellLogs & storage
-
-npm start- Incoming requests are appended to `logs/requests.log`.
-
-```- Responses are appended to `logs/responses.json`.
-
-
-
-3. Open http://localhost:3000Example (PowerShell, Vertex AI service account JSON)
-
-
-
-Optional: OpenAI fallback```powershell
-
-- Set the environment variable `OPENAI_API_KEY` to enable server-side fallback to OpenAI when the local matching score is low.$env:GCP_PROJECT = "your-project-id"
-
-$env:GCP_LOCATION = "us-central1"
-
-Example (PowerShell):$env:GEMINI_MODEL = "gemini-1.5-flash"
-
-$env:GOOGLE_APPLICATION_CREDENTIALS = "C:\path\to\service-account.json"
-
-```powershell- `GOOGLE_PROJECT_ID` — your GCP project id
-
-$env:OPENAI_API_KEY = "sk-..."
-
-npm start# send a webhook question
-
-```Invoke-RestMethod -Method Post -Uri http://localhost:3000/webhook -Body (ConvertTo-Json @{ question = "How do I reset my password?"; userId = "user-123" }) -ContentType 'application/json'
-
+**Add Category:**
+```bash
+POST http://localhost:3000/api/admin/categories
+{
+  "name": "Category Name",
+  "icon": "🎯",
+  "description": "Category description",
+  "displayOrder": 1
+}
 ```
 
-Gemini Premium (Vertex AI) automation
-
-------------------------------------Notes
-
-- The server only calls Gemini when the local FAQ similarity score is < 0.55, to save tokens. Adjust this in `src/automation.js` if desired.
-
-The `/webhook` endpoint logs incoming questions, adds FAQ context, and can call Gemini Premium via Vertex AI when the local match confidence is low.- Ensure the service account has the Vertex AI User role (or the specific `aiplatform.endpoints.generateContent` permission).
-
-- When deploying to Cloud Run / GCE / GKE, prefer Workload Identity instead of storing a JSON key.
-
-Environment variables- `GOOGLE_LOCATION` — e.g., `us-central1`
-
-- `GCP_PROJECT` (or `GOOGLE_CLOUD_PROJECT` / `GOOGLE_PROJECT_ID`) - Google Cloud project that has access to Gemini- `GOOGLE_MODEL` — the model id (for publisher models use e.g. `text-bison@001` or `projects/.../publishers/.../models/...`)
-
-- `GCP_LOCATION` (or `GOOGLE_LOCATION`) - Vertex AI region, for example `us-central1`- `GOOGLE_APPLICATION_CREDENTIALS` — (optional) path to a service account JSON key file, or rely on ADC when running on GCP
-
-- `GEMINI_MODEL` (or `GOOGLE_MODEL`) - Gemini model id, for example `gemini-1.5-flash`
-
-- `GOOGLE_APPLICATION_CREDENTIALS` - path to a service account JSON key (for local dev), or rely on Application Default Credentials when deployed to GCPThe code will use the Google Auth library to obtain an access token and call the Vertex AI predict endpoint. Example (PowerShell):
-
-
-
-Webhook endpoint (POST)```powershell
-
-- `POST /webhook` with JSON body containing:$env:GOOGLE_PROJECT_ID = 'my-project-id'
-
-  - `question` (string) - required$env:GOOGLE_LOCATION = 'us-central1'
-
-  - `source` (string) - optional source identifier$env:GOOGLE_MODEL = 'text-bison@001'
-
-  - `userId` (string) - optional user id$env:GOOGLE_APPLICATION_CREDENTIALS = 'C:\path\to\sa.json'
-
-npm start
-
-Response
-
-- 200 JSON: `{ answer, provider, localScore }`Invoke-RestMethod -Method Post -Uri http://localhost:3000/webhook -Body (ConvertTo-Json @{ question = "How do I reset my password?" }) -ContentType 'application/json'
-
+**Add Question:**
+```bash
+POST http://localhost:3000/api/admin/questions
+{
+  "categoryId": 1,
+  "question": "Your question?",
+  "answer": "Your answer here.",
+  "displayOrder": 1
+}
 ```
 
-Logs and storage
+## 📊 Database Structure
 
-- Incoming requests are appended to `logs/requests.log`If you prefer a simple gateway that accepts a bearer token, the older `GEMINI_API_URL` + `GEMINI_API_KEY` approach remains in the codebase but Vertex is the recommended path.
+### Categories Table
+- `id` - Unique identifier
+- `name` - Category name
+- `icon` - Emoji icon
+- `description` - Short description
+- `display_order` - Order of appearance
+- `created_at` - Timestamp
 
-- Responses are appended to `logs/responses.json`
+### Questions Table
+- `id` - Unique identifier
+- `category_id` - Foreign key to categories
+- `question` - The question text
+- `answer` - The answer text
+- `display_order` - Order within category
+- `created_at` - Timestamp
 
-Webhook endpoint (POST)
-
-Example (PowerShell, Vertex AI service account JSON)- `POST /webhook` with JSON body:
-
-	- `question` (string) — required
-
-```powershell	- `source` (string) — optional source identifier
-
-$env:GCP_PROJECT = "your-project-id"	- `userId` (string) — optional user id
-
-$env:GCP_LOCATION = "us-central1"
-
-$env:GEMINI_MODEL = "gemini-1.5-flash"Response:
-
-$env:GOOGLE_APPLICATION_CREDENTIALS = "C:\path\to\service-account.json"- 200 JSON: { answer, provider, localScore }
-
-npm start
-
-Logs & storage
-
-# Send a webhook question- Incoming requests are appended to `logs/requests.log`.
-
-Invoke-RestMethod -Method Post -Uri http://localhost:3000/webhook -Body (ConvertTo-Json @{ question = "How do I reset my password?"; userId = "user-123" }) -ContentType 'application/json'- Responses are appended to `logs/responses.json`.
+## 🗂️ File Structure
 
 ```
+FAQbot/
+├── server-new.js          # Clean server (USE THIS)
+├── db-new.js              # Database operations
+├── init-db.js             # Database initialization
+├── add-my-data.js         # Data manager (EDIT THIS to add data)
+├── import-sample-data.js  # Sample data importer
+├── sbo-faq.db             # SQLite database
+├── public/
+│   └── index-new-clean.html   # Clean UI (USE THIS)
+└── package.json
+```
 
-Example (PowerShell):
+## 🎯 Current Sample Data
 
-Notes
+✅ **3 Categories:**
+1. 🎓 SKSU Information (3 questions)
+2. 📝 Enrollment (2 questions)
+3. 👥 SBO Information (2 questions)
 
-- The server only calls Gemini when the local FAQ similarity score is below 0.55 to save tokens. Adjust this in `src/automation.js` if needed.```powershell
+## 🔧 API Endpoints
 
-- Ensure the service account has the Vertex AI User role (permission `aiplatform.endpoints.generateContent`).$env:GEMINI_API_URL = "https://your-gemini-endpoint"
+### Public Endpoints
+- `GET /api/categories` - Get all categories
+- `GET /api/categories/:id/questions` - Get questions for category
+- `GET /api/questions/:id` - Get specific question
+- `POST /api/search` - Search questions
 
-- On Cloud Run, GCE, or GKE prefer Workload Identity over long-lived JSON keys.$env:GEMINI_API_KEY = "ya29.your_token"
+### Admin Endpoints
+- `POST /api/admin/categories` - Add category
+- `POST /api/admin/questions` - Add question
+- `PUT /api/admin/categories/:id` - Update category
+- `PUT /api/admin/questions/:id` - Update question
+- `DELETE /api/admin/categories/:id` - Delete category
+- `DELETE /api/admin/questions/:id` - Delete question
 
-npm start
+## 🎨 Customization
 
-Next steps and improvements
+### Change Colors
+Edit `public/index-new-clean.html`:
+- Gradient: `.gradient-bg` class
+- Button colors: `.question-btn` class
+- Background: `body` class
 
-- Replace the Jaccard matcher with semantic embeddings plus cosine similarity# then POST a question
+### Add More Categories
+Use `add-my-data.js` as described above.
 
-- Add a persistent vector store (for example SQLite plus embeddings)Invoke-RestMethod -Method Post -Uri http://localhost:3000/webhook -Body (ConvertTo-Json @{ question = "How do I reset my password?" }) -ContentType 'application/json'
+### Modify UI
+Edit `public/index-new-clean.html` - well-commented and easy to understand.
 
-- Add tests and CI```
+## 🔊 Voice Feature (Coming Soon)
 
-- Add an admin UI to edit FAQs
+The UI has a placeholder for voice features. The button is visible but not yet functional.
 
-- Build a richer chat UI that streams responsesNotes
+## 📞 Support
 
-- The provided `src/gemini.js` is intentionally generic so you can adapt the JSON payload to match your specific Gemini/Vertex AI API shape. If you share the exact endpoint format you intend to use, I can tailor the client to that API.
+For issues or questions:
+1. Check the database: `sbo-faq.db`
+2. Review server logs
+3. Ensure all dependencies are installed
 
+## 🎉 What's Different from Old Version?
+
+✅ **Removed:**
+- Complex AI features (Groq integration)
+- Self-learning system
+- Multiple databases
+- Complicated scoring algorithms
+- 50+ test files
+- Unnecessary documentation files
+
+✅ **Added:**
+- Clean category-based navigation
+- Simple, fast SQLite operations
+- Easy-to-use data manager
+- Beautiful, modern UI
+- Clear, organized code structure
+
+## 🚀 Next Steps
+
+1. **Add your real data** using `add-my-data.js`
+2. **Test the system** with students
+3. **Implement voice features** when ready
+4. **Deploy to production**
+
+---
+
+Made with ❤️ for SKSU SBO

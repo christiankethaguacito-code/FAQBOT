@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>SKSU SBO FAQ - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background Gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Login Card Glass Morphism */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Lock Icon Animation */
+        .lock-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        /* Premium Input Styling */
+        .premium-input {
+            transition: all 0.3s ease;
+            background: linear-gradient(to bottom, #ffffff, #f9fafb);
+            border: 2px solid #e5e7eb;
+        }
+        
+        .premium-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            background: #ffffff;
+            outline: none;
+        }
+        
+        /* Login Button with Ripple */
+        .login-btn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .login-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Decorative Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
+            bottom: -125px;
+            left: -125px;
+            animation-delay: 2s;
+        }
+        
+        /* Pulse Animation for Icon */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            }
+        }
+        
+        .pulse-icon {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        
+        /* Small Devices (phones, less than 640px) */
+        @media (max-width: 640px) {
+            .login-card {
+                padding: 24px !important;
+                border-radius: 24px !important;
+            }
+            
+            .login-card h1 {
+                font-size: 2rem !important;
+            }
+            
+            .login-card p {
+                font-size: 1rem !important;
+            }
+            
+            .lock-icon {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            .lock-icon svg {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            .premium-input {
+                padding: 14px 16px !important;
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            .login-btn {
+                padding: 14px !important;
+                font-size: 1rem !important;
+            }
+            
+            .orb-1,
+            .orb-2 {
+                width: 200px !important;
+                height: 200px !important;
+            }
+        }
+        
+        /* Extra Small Devices (phones, less than 375px) */
+        @media (max-width: 374px) {
+            .login-card {
+                padding: 20px !important;
+            }
+            
+            .login-card h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .lock-icon {
+                width: 70px !important;
+                height: 70px !important;
+            }
+        }
+        
+        /* Landscape orientation on phones */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .login-card {
+                padding: 20px !important;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .lock-icon {
+                width: 60px !important;
+                height: 60px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .login-card h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .login-card p {
+                font-size: 0.875rem !important;
+            }
+            
+            form > div {
+                margin-bottom: 16px !important;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .login-btn,
+            .premium-input {
+                min-height: 44px;
+            }
+            
+            /* Disable hover ripple on touch */
+            .login-btn:hover::before {
+                display: none;
+            }
+            
+            /* Add active state */
+            .login-btn:active {
+                transform: scale(0.98);
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Safe area insets for notched devices */
+        @supports (padding: max(0px)) {
+            #loginScreen {
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+                padding-top: max(16px, env(safe-area-inset-top));
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4 relative z-10">
+        <div class="login-card rounded-3xl shadow-2xl p-10 max-w-md w-full relative overflow-hidden">
+            <!-- Decorative Orbs -->
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 lock-icon pulse-icon">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-extrabold gradient-text mb-3">Admin Panel</h1>
+                <p class="text-gray-600 text-lg font-medium">SKSU SBO FAQ Management</p>
+                <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-sm font-semibold text-purple-700">Secure Login</span>
+                </div>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" class="relative z-10">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username"
+                        class="premium-input w-full px-5 py-4 rounded-xl font-medium text-base"
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+                
+                <div class="mb-8">
+                    <label class="block text-gray-700 text-sm font-bold mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        class="premium-input w-full px-5 py-4 rounded-xl font-medium text-base"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+                
+                <button 
+                    type="submit"
+                    class="login-btn w-full text-white py-4 rounded-xl font-bold text-lg shadow-xl transition-all"
+                >
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Sign In</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+        <!-- Header -->
+        <div class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">Admin Panel</h1>
+                            <p class="text-sm text-purple-200">Manage FAQ Content</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <a href="/" target="_blank" class="text-white hover:bg-white/20 px-4 py-2 rounded-lg transition text-sm">
+                            View Site
+                        </a>
+                        <button onclick="handleLogout()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition text-sm">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-8 max-w-7xl">
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Total Categories</p>
+                            <p id="totalCategories" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Total Questions</p>
+                            <p id="totalQuestions" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Last Updated</p>
+                            <p id="lastUpdated" class="text-lg font-bold text-gray-800 mt-1">Today</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl shadow-md mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex">
+                        <button onclick="showTab('categories')" id="tabCategories" class="tab-btn px-6 py-4 font-semibold text-purple-600 border-b-2 border-purple-600">
+                            Categories
+                        </button>
+                        <button onclick="showTab('questions')" id="tabQuestions" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800">
+                            Questions
+                        </button>
+                        <button onclick="showTab('voice')" id="tabVoice" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800">
+                            🎤 Voice Settings
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Categories Tab -->
+                <div id="categoriesTab" class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">Categories Management</h2>
+                        <button onclick="showAddCategoryModal()" class="gradient-bg text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition">
+                            + Add Category
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Icon</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Questions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesTableBody" class="divide-y divide-gray-200">
+                                <!-- Categories will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Questions Tab -->
+                <div id="questionsTab" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-xl font-bold text-gray-800">Questions Management</h2>
+                            <select id="filterCategory" onchange="loadQuestions()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <button onclick="showAddQuestionModal()" class="gradient-bg text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition">
+                            + Add Question
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Question</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Answer Preview</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questionsTableBody" class="divide-y divide-gray-200">
+                                <!-- Questions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Voice Settings Tab -->
+                <div id="voiceTab" class="p-6 hidden">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">🎤 Voice Settings</h2>
+                        <p class="text-gray-600 mt-1">Configure text-to-speech voice for all users</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">Select Voice</label>
+                            <select id="voiceSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Loading voices...</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Choose from available browser voices</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                                Speech Rate: <span id="rateValue" class="text-purple-600 font-bold">1.0</span>x
+                            </label>
+                            <input 
+                                type="range" 
+                                id="speechRate" 
+                                min="0.5" 
+                                max="2" 
+                                step="0.1" 
+                                value="1"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0.5x (Slower)</span>
+                                <span>1.0x (Normal)</span>
+                                <span>2.0x (Faster)</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                                Pitch: <span id="pitchValue" class="text-purple-600 font-bold">1.0</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                id="speechPitch" 
+                                min="0" 
+                                max="2" 
+                                step="0.1" 
+                                value="1"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0 (Lower)</span>
+                                <span>1.0 (Normal)</span>
+                                <span>2.0 (Higher)</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                                Volume: <span id="volumeValue" class="text-purple-600 font-bold">1.0</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                id="speechVolume" 
+                                min="0" 
+                                max="1" 
+                                step="0.1" 
+                                value="1"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0 (Mute)</span>
+                                <span>0.5</span>
+                                <span>1.0 (Max)</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button 
+                                onclick="testVoice()" 
+                                class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition"
+                            >
+                                🎧 Test Voice
+                            </button>
+                            <button 
+                                onclick="saveVoiceSettings()" 
+                                class="flex-1 gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition"
+                            >
+                                💾 Save Settings
+                            </button>
+                        </div>
+
+                        <div id="voiceStatus" class="mt-4 hidden p-4 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full mx-4 fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="categoryModalTitle" class="text-2xl font-bold text-gray-800">Add Category</h3>
+                <button onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form onsubmit="handleCategorySubmit(event)">
+                <input type="hidden" id="categoryId">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Icon (Emoji)</label>
+                    <input 
+                        type="text" 
+                        id="categoryIcon"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="🎓"
+                        required
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Use emoji: 🎓📚📝💙⚖️📋🏆</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Category Name</label>
+                    <input 
+                        type="text" 
+                        id="categoryName"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="e.g., University Profile & Identity"
+                        required
+                    >
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Description</label>
+                    <textarea 
+                        id="categoryDescription"
+                        rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="Brief description of this category"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Display Order</label>
+                    <input 
+                        type="number" 
+                        id="categoryOrder"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="1"
+                        min="1"
+                        required
+                    >
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeCategoryModal()" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                        Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-3xl w-full mx-4 fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="questionModalTitle" class="text-2xl font-bold text-gray-800">Add Question</h3>
+                <button onclick="closeQuestionModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form onsubmit="handleQuestionSubmit(event)">
+                <input type="hidden" id="questionId">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Category</label>
+                    <select 
+                        id="questionCategory"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        required
+                    >
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Question</label>
+                    <textarea 
+                        id="questionText"
+                        rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="Enter the question..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Answer</label>
+                    <textarea 
+                        id="questionAnswer"
+                        rows="8"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="Enter the complete answer..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">
+                        📷 Attach Photo (Optional)
+                    </label>
+                    <input 
+                        type="url" 
+                        id="questionImageUrl"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="https://example.com/image.jpg (Image URL)"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">
+                        💡 Enter a valid image URL (JPG, PNG, GIF, WebP). The image will be displayed with the answer.
+                    </p>
+                    <div id="imagePreview" class="mt-2 hidden">
+                        <p class="text-xs text-gray-600 mb-1">Preview:</p>
+                        <img id="imagePreviewImg" src="" alt="Preview" class="max-w-xs max-h-40 rounded-lg border border-gray-300">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Display Order</label>
+                    <input 
+                        type="number" 
+                        id="questionOrder"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="1"
+                        min="1"
+                        required
+                    >
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeQuestionModal()" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                        Save Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Admin authentication credentials
+        const ADMIN_USERNAME = 'Edcel';
+        const ADMIN_PASSWORD = 'Edcel123';
+        let isAuthenticated = false;
+
+        // Check if already logged in
+        if (sessionStorage.getItem('adminAuth') === 'true') {
+            showDashboard();
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminAuth', 'true');
+                showDashboard();
+            } else {
+                alert('Invalid credentials! Please try again.');
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('adminAuth');
+            isAuthenticated = false;
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            isAuthenticated = true;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            await loadCategories();
+            await loadQuestions();
+            await loadStats();
+        }
+
+        async function loadStats() {
+            try {
+                const categoriesRes = await fetch('/api/categories');
+                const categoriesData = await categoriesRes.json();
+                
+                const questionsRes = await fetch('/api/admin/questions');
+                const questionsData = await questionsRes.json();
+                
+                document.getElementById('totalCategories').textContent = categoriesData.categories.length;
+                document.getElementById('totalQuestions').textContent = questionsData.questions.length;
+                
+                const now = new Date();
+                document.getElementById('lastUpdated').textContent = now.toLocaleDateString();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('categoriesTableBody');
+                tbody.innerHTML = '';
+
+                if (data.categories.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No categories found</td></tr>';
+                    return;
+                }
+
+                // Also populate filter dropdown
+                const filterSelect = document.getElementById('filterCategory');
+                filterSelect.innerHTML = '<option value="">All Categories</option>';
+                
+                const questionCategorySelect = document.getElementById('questionCategory');
+                questionCategorySelect.innerHTML = '<option value="">Select Category</option>';
+
+                data.categories.forEach(category => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 text-2xl">${category.icon}</td>
+                        <td class="px-6 py-4 font-medium text-gray-800">${category.name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${category.description}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${category.display_order}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                ${category.question_count || 0} questions
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <button onclick="editCategory(${category.id})" class="text-blue-600 hover:text-blue-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteCategory(${category.id})" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+
+                    // Add to dropdowns
+                    filterSelect.innerHTML += `<option value="${category.id}">${category.icon} ${category.name}</option>`;
+                    questionCategorySelect.innerHTML += `<option value="${category.id}">${category.icon} ${category.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadQuestions() {
+            try {
+                const categoryFilter = document.getElementById('filterCategory').value;
+                const url = categoryFilter ? `/api/categories/${categoryFilter}/questions` : '/api/admin/questions';
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const questions = categoryFilter ? data.questions : data.questions;
+                
+                const tbody = document.getElementById('questionsTableBody');
+                tbody.innerHTML = '';
+
+                if (questions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No questions found</td></tr>';
+                    return;
+                }
+
+                questions.forEach(question => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    const answerPreview = question.answer.substring(0, 80) + (question.answer.length > 80 ? '...' : '');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 text-sm">
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
+                                ${question.category_name || 'Unknown'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 font-medium text-gray-800">${question.question}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${answerPreview}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${question.display_order}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <button onclick="editQuestion(${question.id})" class="text-blue-600 hover:text-blue-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteQuestion(${question.id})" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        // Tab switching
+        function showTab(tab) {
+            const tabs = ['categories', 'questions', 'voice'];
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const tabContent = document.getElementById(`${t}Tab`);
+                
+                if (t === tab) {
+                    tabBtn.classList.add('text-purple-600', 'border-b-2', 'border-purple-600');
+                    tabBtn.classList.remove('text-gray-600');
+                    tabContent.classList.remove('hidden');
+                } else {
+                    tabBtn.classList.remove('text-purple-600', 'border-b-2', 'border-purple-600');
+                    tabBtn.classList.add('text-gray-600');
+                    tabContent.classList.add('hidden');
+                }
+            });
+            
+            // Load voice settings when switching to voice tab
+            if (tab === 'voice') {
+                loadVoiceSettings();
+            }
+        }
+
+        // Category Modal Functions
+        function showAddCategoryModal() {
+            document.getElementById('categoryModalTitle').textContent = 'Add Category';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('categoryIcon').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryDescription').value = '';
+            document.getElementById('categoryOrder').value = '';
+            document.getElementById('categoryModal').classList.add('show');
+        }
+
+        async function editCategory(id) {
+            try {
+                const response = await fetch(`/api/categories`);
+                const data = await response.json();
+                const category = data.categories.find(c => c.id === id);
+                
+                if (category) {
+                    document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+                    document.getElementById('categoryId').value = category.id;
+                    document.getElementById('categoryIcon').value = category.icon;
+                    document.getElementById('categoryName').value = category.name;
+                    document.getElementById('categoryDescription').value = category.description;
+                    document.getElementById('categoryOrder').value = category.display_order;
+                    document.getElementById('categoryModal').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error loading category:', error);
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Are you sure you want to delete this category? All questions in this category will also be deleted.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/categories/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadDashboardData();
+                    alert('Category deleted successfully!');
+                } else {
+                    alert('Failed to delete category');
+                }
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Error deleting category');
+            }
+        }
+
+        async function handleCategorySubmit(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('categoryId').value;
+            const data = {
+                icon: document.getElementById('categoryIcon').value,
+                name: document.getElementById('categoryName').value,
+                description: document.getElementById('categoryDescription').value,
+                displayOrder: parseInt(document.getElementById('categoryOrder').value)
+            };
+
+            try {
+                const url = id ? `/api/admin/categories/${id}` : '/api/admin/categories';
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    closeCategoryModal();
+                    await loadDashboardData();
+                    alert(id ? 'Category updated successfully!' : 'Category added successfully!');
+                } else {
+                    alert('Failed to save category');
+                }
+            } catch (error) {
+                console.error('Error saving category:', error);
+                alert('Error saving category');
+            }
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('show');
+        }
+
+        // Question Modal Functions
+        function showAddQuestionModal() {
+            document.getElementById('questionModalTitle').textContent = 'Add Question';
+            document.getElementById('questionId').value = '';
+            document.getElementById('questionCategory').value = '';
+            document.getElementById('questionText').value = '';
+            document.getElementById('questionAnswer').value = '';
+            document.getElementById('questionImageUrl').value = '';
+            document.getElementById('questionOrder').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('questionModal').classList.add('show');
+        }
+
+        async function editQuestion(id) {
+            try {
+                console.log('📝 Editing question ID:', id);
+                const response = await fetch(`/api/questions/${id}`);
+                const question = await response.json();
+                
+                console.log('📥 Received question data:', question);
+                
+                if (question && question.id) {
+                    document.getElementById('questionModalTitle').textContent = 'Edit Question';
+                    document.getElementById('questionId').value = question.id;
+                    document.getElementById('questionCategory').value = question.category_id;
+                    document.getElementById('questionText').value = question.question;
+                    document.getElementById('questionAnswer').value = question.answer;
+                    document.getElementById('questionImageUrl').value = question.image_url || '';
+                    document.getElementById('questionOrder').value = question.display_order;
+                    
+                    console.log('✅ Form populated with:', {
+                        id: question.id,
+                        category: question.category_id,
+                        question: question.question,
+                        answer: question.answer,
+                        imageUrl: question.image_url,
+                        order: question.display_order
+                    });
+                    
+                    // Show preview if image URL exists
+                    if (question.image_url) {
+                        showImagePreview(question.image_url);
+                    } else {
+                        document.getElementById('imagePreview').classList.add('hidden');
+                    }
+                    
+                    document.getElementById('questionModal').classList.add('show');
+                } else {
+                    console.error('❌ Invalid question data:', question);
+                    alert('Question not found');
+                }
+            } catch (error) {
+                console.error('❌ Error loading question:', error);
+                alert('Failed to load question details');
+            }
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('Are you sure you want to delete this question?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/questions/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadDashboardData();
+                    alert('Question deleted successfully!');
+                } else {
+                    alert('Failed to delete question');
+                }
+            } catch (error) {
+                console.error('Error deleting question:', error);
+                alert('Error deleting question');
+            }
+        }
+
+        async function handleQuestionSubmit(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('questionId').value;
+            const data = {
+                categoryId: parseInt(document.getElementById('questionCategory').value),
+                question: document.getElementById('questionText').value,
+                answer: document.getElementById('questionAnswer').value,
+                imageUrl: document.getElementById('questionImageUrl').value.trim(),
+                displayOrder: parseInt(document.getElementById('questionOrder').value)
+            };
+
+            console.log('💾 Saving question:', { id, data });
+
+            try {
+                const url = id ? `/api/admin/questions/${id}` : '/api/admin/questions';
+                const method = id ? 'PUT' : 'POST';
+                
+                console.log(`📤 ${method} ${url}`);
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log('📥 Server response:', result);
+
+                if (response.ok) {
+                    closeQuestionModal();
+                    await loadDashboardData();
+                    console.log('✅ Question saved successfully!');
+                    alert(id ? 'Question updated successfully!' : 'Question added successfully!');
+                } else {
+                    console.error('❌ Failed to save:', result);
+                    alert('Failed to save question: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('❌ Error saving question:', error);
+                alert('Error saving question: ' + error.message);
+            }
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.remove('show');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const categoryModal = document.getElementById('categoryModal');
+            const questionModal = document.getElementById('questionModal');
+            
+            if (event.target === categoryModal) {
+                closeCategoryModal();
+            }
+            if (event.target === questionModal) {
+                closeQuestionModal();
+            }
+        }
+
+        // ==================== VOICE SETTINGS FUNCTIONS ====================
+        
+        let availableVoices = [];
+        
+        // Load available browser voices
+        function loadBrowserVoices() {
+            availableVoices = speechSynthesis.getVoices();
+            
+            if (availableVoices.length === 0) {
+                speechSynthesis.onvoiceschanged = () => {
+                    availableVoices = speechSynthesis.getVoices();
+                    updateVoiceDropdown();
+                };
+            } else {
+                updateVoiceDropdown();
+            }
+        }
+        
+        function updateVoiceDropdown() {
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = availableVoices.map(voice => 
+                `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`
+            ).join('');
+        }
+        
+        // Load voice settings from database
+        async function loadVoiceSettings() {
+            try {
+                loadBrowserVoices(); // Load available voices first
+                
+                const response = await fetch('/api/voice-settings');
+                const data = await response.json();
+                
+                if (data.settings) {
+                    const settings = data.settings;
+                    
+                    // Set form values
+                    document.getElementById('speechRate').value = settings.voice_rate || 1.0;
+                    document.getElementById('speechPitch').value = settings.voice_pitch || 1.0;
+                    document.getElementById('speechVolume').value = settings.voice_volume || 1.0;
+                    
+                    // Update display values
+                    document.getElementById('rateValue').textContent = settings.voice_rate || 1.0;
+                    document.getElementById('pitchValue').textContent = settings.voice_pitch || 1.0;
+                    document.getElementById('volumeValue').textContent = settings.voice_volume || 1.0;
+                    
+                    // Wait a bit for voices to load, then set the selected voice
+                    setTimeout(() => {
+                        if (settings.voice_name) {
+                            document.getElementById('voiceSelect').value = settings.voice_name;
+                        }
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error loading voice settings:', error);
+                showVoiceStatus('Error loading voice settings', 'error');
+            }
+        }
+        
+        // Update slider value displays
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('speechRate')?.addEventListener('input', (e) => {
+                document.getElementById('rateValue').textContent = e.target.value;
+            });
+            
+            document.getElementById('speechPitch')?.addEventListener('input', (e) => {
+                document.getElementById('pitchValue').textContent = e.target.value;
+            });
+            
+            document.getElementById('speechVolume')?.addEventListener('input', (e) => {
+                document.getElementById('volumeValue').textContent = e.target.value;
+            });
+        });
+        
+        // Test voice with current settings
+        function testVoice() {
+            const text = 'Hello! This is a test of the voice settings for the SKSU SBO FAQ system.';
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const voiceName = document.getElementById('voiceSelect').value;
+            const selectedVoice = availableVoices.find(v => v.name === voiceName);
+            
+            if (selectedVoice) utterance.voice = selectedVoice;
+            utterance.rate = parseFloat(document.getElementById('speechRate').value);
+            utterance.pitch = parseFloat(document.getElementById('speechPitch').value);
+            utterance.volume = parseFloat(document.getElementById('speechVolume').value);
+            
+            speechSynthesis.speak(utterance);
+            showVoiceStatus('🔊 Playing voice sample...', 'info');
+        }
+        
+        // Save voice settings to database
+        async function saveVoiceSettings() {
+            try {
+                const voiceName = document.getElementById('voiceSelect').value;
+                const rate = parseFloat(document.getElementById('speechRate').value);
+                const pitch = parseFloat(document.getElementById('speechPitch').value);
+                const volume = parseFloat(document.getElementById('speechVolume').value);
+                
+                // Get voice language from selected voice
+                const selectedVoice = availableVoices.find(v => v.name === voiceName);
+                const voiceLang = selectedVoice ? selectedVoice.lang : 'en-US';
+                
+                const response = await fetch('/api/admin/voice-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        voiceName: voiceName,
+                        voiceLang: voiceLang,
+                        voiceRate: rate,
+                        voicePitch: pitch,
+                        voiceVolume: volume
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showVoiceStatus('✅ Voice settings saved successfully! Changes will apply to all users immediately.', 'success');
+                } else {
+                    throw new Error('Failed to save voice settings');
+                }
+            } catch (error) {
+                console.error('Error saving voice settings:', error);
+                showVoiceStatus('❌ Error: Failed to save voice settings', 'error');
+            }
+        }
+        
+        // Show status message
+        function showVoiceStatus(message, type) {
+            const statusDiv = document.getElementById('voiceStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = 'mt-4 p-4 rounded-lg';
+            
+            if (type === 'success') {
+                statusDiv.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                statusDiv.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                statusDiv.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            
+            statusDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // ==================== IMAGE PREVIEW FUNCTIONALITY ====================
+        
+        // Show image preview
+        function showImagePreview(imageUrl) {
+            const preview = document.getElementById('imagePreview');
+            const img = document.getElementById('imagePreviewImg');
+            
+            if (imageUrl && imageUrl.trim() !== '') {
+                img.src = imageUrl;
+                img.onerror = function() {
+                    preview.classList.add('hidden');
+                };
+                img.onload = function() {
+                    preview.classList.remove('hidden');
+                };
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+        
+        // Add event listener for image URL input
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageUrlInput = document.getElementById('questionImageUrl');
+            if (imageUrlInput) {
+                imageUrlInput.addEventListener('input', function(e) {
+                    const url = e.target.value.trim();
+                    if (url) {
+                        // Debounce the preview update
+                        clearTimeout(imageUrlInput.previewTimeout);
+                        imageUrlInput.previewTimeout = setTimeout(() => {
+                            showImagePreview(url);
+                        }, 500);
+                    } else {
+                        document.getElementById('imagePreview').classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

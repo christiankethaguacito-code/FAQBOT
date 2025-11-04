@@ -1,7 +1,31 @@
+# Dependencies
 node_modules/
+package-lock.json
+
+# Database
+*.db-shm
+*.db-wal
+
+# Environment
 .env
+.env.local
+
+# Logs
+logs/
 *.log
+
+# OS
 .DS_Store
-android/
-ios/
-.capacitor/
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backups
+backup-*/
+*.backup
+*-old.*
+*-new.*

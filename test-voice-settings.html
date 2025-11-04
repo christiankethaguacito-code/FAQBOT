@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Voice Settings API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold mb-6 text-purple-600">🎙️ Voice Settings API Test</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testGetSettings()" class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                📥 GET Voice Settings
+            </button>
+            
+            <button onclick="testUpdateSettings()" class="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600">
+                💾 UPDATE Voice Settings
+            </button>
+            
+            <button onclick="testSpeech()" class="w-full bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600">
+                🔊 Test Speech with Current Settings
+            </button>
+        </div>
+        
+        <div id="output" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <pre id="result" class="text-sm">Click a button to test...</pre>
+        </div>
+    </div>
+
+    <script>
+        let currentSettings = null;
+        let availableVoices = [];
+        
+        // Load voices
+        function loadVoices() {
+            availableVoices = speechSynthesis.getVoices();
+            if (availableVoices.length === 0) {
+                speechSynthesis.onvoiceschanged = () => {
+                    availableVoices = speechSynthesis.getVoices();
+                };
+            }
+        }
+        loadVoices();
+        
+        async function testGetSettings() {
+            try {
+                const response = await fetch('/api/voice-settings');
+                const data = await response.json();
+                currentSettings = data.settings;
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testUpdateSettings() {
+            try {
+                const testSettings = {
+                    voiceName: 'Google US English',
+                    voiceLang: 'en-US',
+                    voiceRate: 1.5,
+                    voicePitch: 1.2,
+                    voiceVolume: 0.8
+                };
+                
+                const response = await fetch('/api/admin/voice-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testSettings)
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').textContent = 
+                    'Update Response:\n' + JSON.stringify(data, null, 2) + 
+                    '\n\nTest Settings:\n' + JSON.stringify(testSettings, null, 2);
+                
+                // Reload settings
+                await testGetSettings();
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testSpeech() {
+            if (!currentSettings) {
+                await testGetSettings();
+            }
+            
+            if (!currentSettings) {
+                document.getElementById('result').textContent = 'Error: No settings loaded. Click GET first.';
+                return;
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(
+                'Testing voice settings from the database. Rate: ' + currentSettings.voice_rate + 
+                ', Pitch: ' + currentSettings.voice_pitch + 
+                ', Volume: ' + currentSettings.voice_volume
+            );
+            
+            utterance.lang = currentSettings.voice_lang || 'en-US';
+            utterance.rate = currentSettings.voice_rate || 1.0;
+            utterance.pitch = currentSettings.voice_pitch || 1.0;
+            utterance.volume = currentSettings.voice_volume || 1.0;
+            
+            if (currentSettings.voice_name && availableVoices.length > 0) {
+                const selectedVoice = availableVoices.find(v => v.name === currentSettings.voice_name);
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+            }
+            
+            speechSynthesis.speak(utterance);
+            document.getElementById('result').textContent = 
+                '🔊 Speaking with settings:\n' + JSON.stringify(currentSettings, null, 2);
+        }
+    </script>
+</body>
+</html>

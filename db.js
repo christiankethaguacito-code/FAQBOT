@@ -1,6 +1,19 @@
 import Database from 'better-sqlite3';
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
-const db = new Database('sbo-faq.db');
+// Use Railway volume if available, otherwise local
+const DB_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || './';
+const DB_PATH = join(DB_DIR, 'sbo-faq.db');
+
+// Ensure directory exists
+if (!existsSync(DB_DIR)) {
+  mkdirSync(DB_DIR, { recursive: true });
+}
+
+console.log(`📁 Database path: ${DB_PATH}`);
+
+const db = new Database(DB_PATH);
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');

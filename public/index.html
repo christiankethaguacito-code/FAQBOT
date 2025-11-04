@@ -169,8 +169,10 @@
         .messages-area {
             height: calc(100vh - 280px);
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 24px;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
         .messages-area::-webkit-scrollbar {
@@ -530,6 +532,9 @@
                 height: calc(100vh - 220px);
                 height: calc(100dvh - 220px);
                 padding: 16px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
             }
 
             .message-content {

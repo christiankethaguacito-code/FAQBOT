@@ -1,11 +1,23 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const db = new Database(join(__dirname, 'sbo-faq.db'));
+// Use environment-based path (same as db.js and init-complete-db.js)
+const DB_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || './';
+const DB_PATH = join(DB_DIR, 'sbo-faq.db');
+
+console.log('📁 Database path:', DB_PATH);
+
+// Ensure directory exists
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+}
+
+const db = new Database(DB_PATH);
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');

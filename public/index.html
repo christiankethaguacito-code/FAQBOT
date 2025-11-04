@@ -167,12 +167,14 @@
 
         /* Messages Area */
         .messages-area {
-            height: calc(100vh - 280px);
+            flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 24px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            position: relative;
+            touch-action: pan-y; /* Allow vertical scrolling on touch devices */
         }
 
         .messages-area::-webkit-scrollbar {
@@ -529,12 +531,12 @@
             }
 
             .messages-area {
-                height: calc(100vh - 220px);
-                height: calc(100dvh - 220px);
+                flex: 1;
                 padding: 16px;
                 overflow-y: auto;
                 overflow-x: hidden;
                 -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
             }
 
             .message-content {

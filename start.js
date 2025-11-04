@@ -52,7 +52,7 @@ async function checkAndInitDatabase() {
         console.log('📥 Initializing database...');
         // Set environment variable for child processes
         process.env.DATA_DIR = DB_DIR;
-        await execAsync('node init-db.js');
+        await execAsync('node init-complete-db.js');
         console.log('📥 Importing SKSU data...');
         await execAsync('node import-sksu-data.js');
         console.log('✅ Database ready!');

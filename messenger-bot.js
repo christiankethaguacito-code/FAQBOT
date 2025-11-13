@@ -10,17 +10,23 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // Webhook verification endpoint
 router.get('/webhook', (req, res) => {
+    console.log('📞 Webhook GET request received:', req.query);
+    
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
     if (mode && token) {
         if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-            console.log('✅ Webhook verified!');
+            console.log('✅ Webhook verified! Token matches.');
             res.status(200).send(challenge);
         } else {
+            console.log('❌ Webhook verification failed. Token mismatch.');
             res.sendStatus(403);
         }
+    } else {
+        console.log('❌ Missing mode or token parameters');
+        res.sendStatus(400);
     }
 });
 

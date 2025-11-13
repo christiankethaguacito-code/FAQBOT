@@ -1090,6 +1090,7 @@
 
         // Add Bot Message
         function addBotMessage(message, imageUrl = '') {
+            console.log('🤖 Adding bot message with speaker button');
             const area = document.getElementById('messagesArea');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot-message';

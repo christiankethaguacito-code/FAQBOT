@@ -1091,12 +1091,18 @@
         // Add Bot Message
         function addBotMessage(message, imageUrl = '') {
             console.log('🤖 Adding bot message with speaker button');
+            console.log('📝 Original message length:', message.length);
+            console.log('📝 Message preview:', message.substring(0, 100));
+            
             const area = document.getElementById('messagesArea');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot-message';
             
             const messageId = 'msg-' + Date.now();
             const formattedMessage = formatMessage(message);
+            const escapedMessage = escapeForJs(message);
+            
+            console.log('✅ Escaped message preview:', escapedMessage.substring(0, 100));
             
             const imageHTML = imageUrl ? `
                 <img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}', '_blank')" alt="Reference" />
@@ -1107,7 +1113,7 @@
                 <div style="flex: 1;">
                     <div class="message-content bot-message-content" style="display: flex; align-items: flex-start; gap: 8px;">
                         <div style="flex: 1;">${formattedMessage}${imageHTML}</div>
-                        <button class="speaker-btn" onclick="speakMessage('${messageId}', \`${escapeForJs(message)}\`)" title="Listen">
+                        <button class="speaker-btn" data-message-id="${messageId}" title="Listen">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                             </svg>
@@ -1117,7 +1123,19 @@
             `;
             
             messageDiv.id = messageId;
+            // Store the original message text as a data attribute for speech
+            messageDiv.dataset.originalText = message;
             area.appendChild(messageDiv);
+            
+            // Add click event listener to speaker button
+            const speakerBtn = messageDiv.querySelector('.speaker-btn');
+            if (speakerBtn) {
+                speakerBtn.addEventListener('click', () => {
+                    speakMessage(messageId, message);
+                });
+            }
+            
+            console.log('✅ Message added with ID:', messageId);
             scrollToBottom();
         }
 

@@ -1288,7 +1288,12 @@
         }
 
         function escapeForJs(text) {
-            return text.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+            return text
+                .replace(/\\/g, '\\\\')  // Escape backslashes first
+                .replace(/`/g, '\\`')     // Escape backticks
+                .replace(/\$/g, '\\$')    // Escape dollar signs
+                .replace(/\n/g, ' ')      // Replace newlines with spaces
+                .replace(/\r/g, '');      // Remove carriage returns
         }
 
         function formatMessage(message) {

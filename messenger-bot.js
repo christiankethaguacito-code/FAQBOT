@@ -1,12 +1,15 @@
 import express from 'express';
+import { createRequire } from 'module';
 import { categoryOps, questionOps } from './db.js';
-import { chatWithGroq } from './groq-ai.js';
+
+const require = createRequire(import.meta.url);
+const { chatWithAI } = require('./groq-ai.js');
 
 const router = express.Router();
 
 // Facebook Messenger Configuration
-const VERIFY_TOKEN = process.env.MESSENGER_VERIFY_TOKEN || 'your_verify_token_here';
-const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'your_verify_token_here';
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // Webhook verification endpoint
 router.get('/webhook', (req, res) => {
@@ -78,7 +81,7 @@ async function handleMessage(senderId, message) {
             ]);
         } else {
             // No FAQ found, use AI
-            const aiResponse = await chatWithGroq(userMessage);
+            const aiResponse = await chatWithAI(userMessage);
             await sendTextMessage(senderId, `🤖 AI Response:\n\n${aiResponse}`);
             
             await sendQuickReplies(senderId, "Was this helpful?", [

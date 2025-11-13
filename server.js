@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { categoryOps, questionOps, searchOps, voiceSettingsOps, feedbackOps, analyticsOps } from './db.js';
 import Groq from 'groq-sdk';
+import messengerRouter from './messenger-bot.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -75,6 +76,9 @@ Guidelines:
 
 app.use(express.json());
 app.use(express.static('public'));
+
+// Facebook Messenger webhook
+app.use('/webhook', messengerRouter);
 
 // Admin panel route
 app.get('/admin', (req, res) => {

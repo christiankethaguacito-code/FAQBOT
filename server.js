@@ -78,7 +78,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Facebook Messenger webhook
+console.log('📱 Registering messenger webhook routes...');
 app.use('/webhook', messengerRouter);
+console.log('✅ Messenger webhook routes registered');
+
+// Test route
+app.get('/webhook-test', (req, res) => {
+  res.send('Webhook route is registered!');
+});
 
 // Admin panel route
 app.get('/admin', (req, res) => {

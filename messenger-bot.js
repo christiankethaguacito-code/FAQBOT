@@ -5,7 +5,7 @@ import { chatWithAI } from './groq-ai.js';
 const router = express.Router();
 
 // Facebook Messenger Configuration
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'your_verify_token_here';
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'sksu_faq_bot_verify_2024';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // Webhook verification endpoint

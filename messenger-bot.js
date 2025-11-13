@@ -1,9 +1,6 @@
 import express from 'express';
-import { createRequire } from 'module';
 import { categoryOps, questionOps } from './db.js';
-
-const require = createRequire(import.meta.url);
-const { chatWithAI } = require('./groq-ai.js');
+import { chatWithAI } from './groq-ai.js';
 
 const router = express.Router();
 

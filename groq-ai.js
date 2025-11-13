@@ -1,4 +1,4 @@
-const Groq = require('groq-sdk');
+import Groq from 'groq-sdk';
 
 // Initialize Groq client
 const groq = new Groq({
@@ -106,7 +106,4 @@ async function streamChatWithAI(userMessage, conversationHistory = []) {
   return stream;
 }
 
-module.exports = {
-  chatWithAI,
-  streamChatWithAI
-};
+export { chatWithAI, streamChatWithAI };

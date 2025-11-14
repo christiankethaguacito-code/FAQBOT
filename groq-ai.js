@@ -1,9 +1,18 @@
 import Groq from 'groq-sdk';
 
-// Initialize Groq client
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+// Lazy initialize Groq client
+let groq = null;
+
+function getGroqClient() {
+  if (!groq) {
+    const apiKey = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_1;
+    if (!apiKey) {
+      throw new Error('GROQ_API_KEY environment variable is required');
+    }
+    groq = new Groq({ apiKey });
+  }
+  return groq;
+}
 
 // System context about SKSU
 const SKSU_CONTEXT = `You are an AI assistant for Sultan Kudarat State University (SKSU) Student Body Organization.
@@ -50,7 +59,8 @@ async function chatWithAI(userMessage, conversationHistory = []) {
     ];
 
     // Call Groq API
-    const completion = await groq.chat.completions.create({
+    const client = getGroqClient();
+    const completion = await client.chat.completions.create({
       messages: messages,
       model: 'llama-3.1-70b-versatile', // Fast and capable model
       temperature: 0.7,
@@ -94,7 +104,8 @@ async function streamChatWithAI(userMessage, conversationHistory = []) {
     }
   ];
 
-  const stream = await groq.chat.completions.create({
+  const client = getGroqClient();
+  const stream = await client.chat.completions.create({
     messages: messages,
     model: 'llama-3.1-70b-versatile',
     temperature: 0.7,

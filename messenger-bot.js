@@ -65,6 +65,22 @@ async function handleMessage(senderId, message) {
     await sendTypingIndicator(senderId, true);
 
     try {
+        // Check for creator/developer questions
+        const lowerMessage = userMessage.toLowerCase();
+        if (lowerMessage.includes('creator') || 
+            lowerMessage.includes('developer') || 
+            lowerMessage.includes('who made you') || 
+            lowerMessage.includes('who created you') ||
+            lowerMessage.includes('who built you') ||
+            lowerMessage.includes('who developed you')) {
+            await sendTextMessage(senderId, 
+                "👨‍💻 I was created by Christian Keth Aguacito!\n\n" +
+                "Christian Keth Aguacito is a developer who built me to help SKSU students get quick answers to their questions. 🚀"
+            );
+            await sendTypingIndicator(senderId, false);
+            return;
+        }
+        
         // Search FAQ first
         const searchResults = questionOps.search(userMessage);
 

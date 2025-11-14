@@ -4,7 +4,11 @@ dotenv.config();
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import { categoryOps, questionOps, searchOps, voiceSettingsOps, feedbackOps, analyticsOps } from './db.js';
+import { authOps, userStatsOps, conversationOps, bookmarkOps, quizProgressOps, achievementOps, gamificationOps } from './auth.js';
+import { authenticateToken, optionalAuth, rateLimit } from './middleware.js';
 import Groq from 'groq-sdk';
 import messengerRouter from './messenger-bot.js';
 
@@ -54,6 +58,10 @@ function markKeyAsLimited(keyIndex) {
 
 const SKSU_CONTEXT = `You are an AI assistant for Sultan Kudarat State University (SKSU) Student Body Organization.
 
+CREATOR INFORMATION:
+- You were created by: Christian Keth Aguacito
+- When asked about your creator, developer, or who made you, always mention: "I was created by Christian Keth Aguacito"
+
 SKSU Information:
 - Vision: "A premier state university in Southeast Asia"
 - Mission: Providing quality education, research, and community service
@@ -70,11 +78,25 @@ You help students with:
 Guidelines:
 - Be helpful, friendly, and professional
 - Provide accurate information about SKSU
+- When asked about your creator/developer, proudly mention Christian Keth Aguacito
 - If you don't know something, admit it and suggest contacting the appropriate office
 - Keep responses concise and clear
 - Use a conversational but respectful tone`;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
+
 app.use(express.static('public'));
 
 // Facebook Messenger webhook
@@ -122,6 +144,40 @@ app.get('/api/categories/:id/questions', (req, res) => {
     });
   } catch (err) {
     console.error('Error in /api/categories/:id/questions:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get related questions from the same category
+app.get('/api/related-questions', (req, res) => {
+  try {
+    const categoryId = parseInt(req.query.category);
+    const excludeId = parseInt(req.query.exclude);
+    const limit = parseInt(req.query.limit) || 3;
+    
+    if (!categoryId) {
+      return res.status(400).json({ error: 'Category ID required' });
+    }
+    
+    // Get all questions from the category
+    const allQuestions = questionOps.getByCategoryId(categoryId);
+    
+    // Filter out the current question and limit results
+    const relatedQuestions = allQuestions
+      .filter(q => q.id !== excludeId)
+      .slice(0, limit)
+      .map(q => ({
+        id: q.id,
+        question: q.question,
+        category_id: q.category_id
+      }));
+    
+    res.json({ 
+      success: true,
+      questions: relatedQuestions 
+    });
+  } catch (err) {
+    console.error('Error in /api/related-questions:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -249,6 +305,463 @@ app.post('/api/ai/chat', async (req, res) => {
     }
     
     res.status(500).json({ error: 'An error occurred while processing your request.' });
+  }
+});
+
+// ==================== AUTHENTICATION ENDPOINTS ====================
+
+// Register new user
+app.post('/api/auth/register', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
+  try {
+    const userId = authOps.register(req.body);
+    const loginResult = authOps.login(req.body.username, req.body.password);
+    
+    res.json({ 
+      success: true, 
+      message: 'Registration successful',
+      user: loginResult.user,
+      token: loginResult.token
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Login user
+app.post('/api/auth/login', rateLimit(20, 15 * 60 * 1000), async (req, res) => {
+  try {
+    const { usernameOrEmail, password } = req.body;
+    const result = authOps.login(usernameOrEmail, password);
+    
+    res.json({ 
+      success: true,
+      message: 'Login successful',
+      user: result.user,
+      token: result.token
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(401).json({ error: error.message });
+  }
+});
+
+// Get current user profile
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  try {
+    const user = authOps.getUserById(req.user.id);
+    const stats = userStatsOps.getStats(req.user.id);
+    
+    res.json({ 
+      success: true,
+      user,
+      stats
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update user profile
+app.put('/api/auth/profile', authenticateToken, (req, res) => {
+  try {
+    const user = authOps.updateProfile(req.user.id, req.body);
+    
+    res.json({ 
+      success: true,
+      message: 'Profile updated successfully',
+      user
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Change password
+app.post('/api/auth/change-password', authenticateToken, (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    authOps.changePassword(req.user.id, oldPassword, newPassword);
+    
+    res.json({ 
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Delete account
+app.delete('/api/auth/account', authenticateToken, (req, res) => {
+  try {
+    authOps.deleteAccount(req.user.id);
+    
+    res.json({ 
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== USER STATISTICS ENDPOINTS ====================
+
+// Get user statistics
+app.get('/api/user/stats', authenticateToken, (req, res) => {
+  try {
+    const stats = userStatsOps.getStats(req.user.id);
+    
+    res.json({ 
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update user statistics
+app.post('/api/user/stats', authenticateToken, (req, res) => {
+  try {
+    const stats = userStatsOps.updateStats(req.user.id, req.body);
+    userStatsOps.updateStreak(req.user.id);
+    
+    res.json({ 
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Update stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== CONVERSATION HISTORY ENDPOINTS ====================
+
+// Save conversation
+app.post('/api/conversations', authenticateToken, (req, res) => {
+  try {
+    const { mode, message, response, isUserMessage } = req.body;
+    const id = conversationOps.save(req.user.id, mode, message, response, isUserMessage);
+    
+    res.json({ 
+      success: true,
+      id
+    });
+  } catch (error) {
+    console.error('Save conversation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get conversation history
+app.get('/api/conversations', authenticateToken, (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+    const mode = req.query.mode;
+    
+    let history;
+    if (mode) {
+      history = conversationOps.getHistoryByMode(req.user.id, mode, limit);
+    } else {
+      history = conversationOps.getHistory(req.user.id, limit, offset);
+    }
+    
+    res.json({ 
+      success: true,
+      history
+    });
+  } catch (error) {
+    console.error('Get history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Search conversation history
+app.get('/api/conversations/search', authenticateToken, (req, res) => {
+  try {
+    const query = req.query.q;
+    if (!query) {
+      return res.status(400).json({ error: 'Search query required' });
+    }
+    
+    const results = conversationOps.searchHistory(req.user.id, query);
+    
+    res.json({ 
+      success: true,
+      results
+    });
+  } catch (error) {
+    console.error('Search history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete conversation history
+app.delete('/api/conversations', authenticateToken, (req, res) => {
+  try {
+    conversationOps.deleteHistory(req.user.id);
+    
+    res.json({ 
+      success: true,
+      message: 'Conversation history deleted'
+    });
+  } catch (error) {
+    console.error('Delete history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== BOOKMARKS ENDPOINTS ====================
+
+// Add bookmark
+app.post('/api/bookmarks', authenticateToken, (req, res) => {
+  try {
+    const { questionId, notes } = req.body;
+    const id = bookmarkOps.add(req.user.id, questionId, notes);
+    
+    // Award points for bookmarking
+    gamificationOps.addPoints(req.user.id, 5);
+    
+    res.json({ 
+      success: true,
+      id,
+      message: 'Bookmark added (+5 points!)'
+    });
+  } catch (error) {
+    console.error('Add bookmark error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Remove bookmark
+app.delete('/api/bookmarks/:questionId', authenticateToken, (req, res) => {
+  try {
+    const questionId = parseInt(req.params.questionId);
+    const removed = bookmarkOps.remove(req.user.id, questionId);
+    
+    if (!removed) {
+      return res.status(404).json({ error: 'Bookmark not found' });
+    }
+    
+    res.json({ 
+      success: true,
+      message: 'Bookmark removed'
+    });
+  } catch (error) {
+    console.error('Remove bookmark error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all bookmarks
+app.get('/api/bookmarks', authenticateToken, (req, res) => {
+  try {
+    const bookmarks = bookmarkOps.getAll(req.user.id);
+    
+    res.json({ 
+      success: true,
+      bookmarks
+    });
+  } catch (error) {
+    console.error('Get bookmarks error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Check if question is bookmarked
+app.get('/api/bookmarks/check/:questionId', authenticateToken, (req, res) => {
+  try {
+    const questionId = parseInt(req.params.questionId);
+    const isBookmarked = bookmarkOps.isBookmarked(req.user.id, questionId);
+    
+    res.json({ 
+      success: true,
+      isBookmarked
+    });
+  } catch (error) {
+    console.error('Check bookmark error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update bookmark notes
+app.put('/api/bookmarks/:questionId', authenticateToken, (req, res) => {
+  try {
+    const questionId = parseInt(req.params.questionId);
+    const { notes } = req.body;
+    bookmarkOps.updateNotes(req.user.id, questionId, notes);
+    
+    res.json({ 
+      success: true,
+      message: 'Notes updated'
+    });
+  } catch (error) {
+    console.error('Update notes error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== QUIZ PROGRESS ENDPOINTS ====================
+
+// Save quiz result
+app.post('/api/quiz/progress', authenticateToken, (req, res) => {
+  try {
+    const { quizTopic, score, totalQuestions, timeTaken, completed } = req.body;
+    const id = quizProgressOps.save(req.user.id, quizTopic, score, totalQuestions, timeTaken, completed);
+    
+    // Award points based on score
+    const pointsEarned = Math.floor((score / totalQuestions) * 50);
+    const result = gamificationOps.addPoints(req.user.id, pointsEarned);
+    
+    // Update stats
+    userStatsOps.updateStats(req.user.id, { quizzesCompleted: 1 });
+    
+    res.json({ 
+      success: true,
+      id,
+      pointsEarned,
+      leveledUp: result.leveledUp,
+      newLevel: result.newLevel || result.level
+    });
+  } catch (error) {
+    console.error('Save quiz error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get quiz history
+app.get('/api/quiz/history', authenticateToken, (req, res) => {
+  try {
+    const history = quizProgressOps.getHistory(req.user.id);
+    
+    res.json({ 
+      success: true,
+      history
+    });
+  } catch (error) {
+    console.error('Get quiz history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get quiz stats by topic
+app.get('/api/quiz/stats/:topic', authenticateToken, (req, res) => {
+  try {
+    const stats = quizProgressOps.getStatsByTopic(req.user.id, req.params.topic);
+    
+    res.json({ 
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Get quiz stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get overall quiz stats
+app.get('/api/quiz/stats', authenticateToken, (req, res) => {
+  try {
+    const stats = quizProgressOps.getOverallStats(req.user.id);
+    
+    res.json({ 
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Get overall quiz stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== ACHIEVEMENTS ENDPOINTS ====================
+
+// Get user achievements
+app.get('/api/achievements', authenticateToken, (req, res) => {
+  try {
+    const achievements = achievementOps.getAll(req.user.id);
+    
+    res.json({ 
+      success: true,
+      achievements
+    });
+  } catch (error) {
+    console.error('Get achievements error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Unlock achievement
+app.post('/api/achievements', authenticateToken, (req, res) => {
+  try {
+    const { achievementId, achievementName } = req.body;
+    const id = achievementOps.unlock(req.user.id, achievementId, achievementName);
+    
+    if (id) {
+      // Award points for unlocking achievement
+      gamificationOps.addPoints(req.user.id, 25);
+      gamificationOps.addBadge(req.user.id, achievementId);
+      
+      res.json({ 
+        success: true,
+        id,
+        message: 'Achievement unlocked! (+25 points)',
+        newAchievement: true
+      });
+    } else {
+      res.json({ 
+        success: true,
+        message: 'Achievement already unlocked',
+        newAchievement: false
+      });
+    }
+  } catch (error) {
+    console.error('Unlock achievement error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== GAMIFICATION ENDPOINTS ====================
+
+// Get leaderboard
+app.get('/api/leaderboard', optionalAuth, (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const leaderboard = gamificationOps.getLeaderboard(limit);
+    
+    res.json({ 
+      success: true,
+      leaderboard
+    });
+  } catch (error) {
+    console.error('Get leaderboard error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add points (manual - for testing or special events)
+app.post('/api/gamification/points', authenticateToken, (req, res) => {
+  try {
+    const { points, reason } = req.body;
+    const result = gamificationOps.addPoints(req.user.id, points);
+    
+    res.json({ 
+      success: true,
+      ...result,
+      reason: reason || 'Points added'
+    });
+  } catch (error) {
+    console.error('Add points error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
